@@ -7,10 +7,22 @@ dotenv.config();
 const app = express();
 const server = http.createServer(app);
 
+// Get allowed origins from environment variable or use defaults
+const getAllowedOrigins = () => {
+  const nodeEnv = process.env.NODE_ENV || "development";
+  
+  if (nodeEnv === "production" && process.env.CLIENT_URL) {
+    return process.env.ClientUrl.split(",").map(url => url.trim());
+  }
+  
+  // Development defaults
+  return ["http://localhost:5173"];
+};
 
 const io = new Server(server, {
   cors: {
-    origin:process.env.ClientUrl, 
+    origin: getAllowedOrigins(),
+    credentials: true,
   },
 });
 

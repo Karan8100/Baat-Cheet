@@ -5,7 +5,23 @@ import  { axiosInstance } from "../lib/axios.js"; // Axios instance with baseURL
 import toast from "react-hot-toast";
 import { io } from "socket.io-client";
 
-const BASE_URL = import.meta.env.MODE === "development" ? "http://localhost:5000" : "/";
+// Get BASE_URL from environment variable or use defaults
+const getBaseURL = () => {
+  // If VITE_API_URL is set, use it for socket connection
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL;
+  }
+  
+  // Development fallback
+  if (import.meta.env.MODE === "development") {
+    return "http://localhost:5000";
+  }
+  
+  // Production fallback (same domain)
+  return window.location.origin;
+};
+
+const BASE_URL = getBaseURL();
 
 export const useAuthStore = create((set, get) => ({
   authUser: null,
