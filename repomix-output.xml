@@ -56,10 +56,10 @@ Backend/routes/auth.routes.js
 Backend/routes/message.routes.js
 Backend/server.js
 DEPLOYMENT_CHECKLIST.md
-Frontend/.env.example
 Frontend/eslint.config.js
 Frontend/index.html
 Frontend/package.json
+Frontend/public/logo.png
 Frontend/public/vite.svg
 Frontend/README.md
 Frontend/src/App.jsx
@@ -93,809 +93,14 @@ Frontend/src/store/useChatStore.js
 Frontend/src/store/useThemeStore.js
 Frontend/vite.config.js
 package.json
+RENDER_DEPLOYMENT.md
 </directory_structure>
 
 <files>
 This section contains the contents of the repository's files.
 
-<file path="DEPLOYMENT_CHECKLIST.md">
-# 🚀 Deployment Checklist for Baat-cheet
+<file path="RENDER_DEPLOYMENT.md">
 
-## Pre-Deployment Requirements
-
-### Backend Setup
-- [ ] Create `.env` file in `Backend/` folder with all required variables
-- [ ] Update `MONGODB_URI` with production MongoDB connection string
-- [ ] Set `NODE_ENV=production`
-- [ ] Set `PORT=5000` (or your hosting provider's port)
-- [ ] Set `CLIENT_URL` to your frontend domain (e.g., `https://yourdomain.com`)
-- [ ] Configure Cloudinary API keys for image uploads
-- [ ] Configure email service (Resend or Nodemailer)
-- [ ] Generate and set a strong `JWT_SECRET`
-
-### Frontend Setup
-- [ ] No `.env` file needed - uses `import.meta.env.MODE`
-- [ ] Axios automatically uses `/api` in production (relative path)
-- [ ] Build with: `npm run build`
-- [ ] Verify dist folder is created
-
-## Environment Variables Needed
-
-### Backend (.env)
-```
-MONGODB_URI=mongodb+srv://user:pass@cluster.mongodb.net
-PORT=5000
-NODE_ENV=production
-CLIENT_URL=https://yourdomain.com
-JWT_SECRET=super_secret_key_min_32_chars
-CLOUDINARY_NAME=cloudinary_name
-CLOUDINARY_API_KEY=your_api_key
-CLOUDINARY_API_SECRET=your_api_secret
-RESEND_API_KEY=your_resend_key
-SENDER_EMAIL=noreply@yourdomain.com
-```
-
-## Deployment Steps
-
-### Option 1: Deploy to Vercel/Railway/Render
-
-1. **Backend Deployment**
-   - [ ] Push code to GitHub
-   - [ ] Connect your git repo to hosting platform
-   - [ ] Add environment variables in platform dashboard
-   - [ ] Set build command: `npm install && npm start`
-   - [ ] Set start command: `npm start`
-
-2. **Frontend Deployment**
-   - [ ] Build: `npm run build`
-   - [ ] Deploy `dist` folder to Vercel/Netlify
-   - [ ] Ensure backend API URL is correctly set
-
-### Option 2: Deploy to Traditional Hosting (VPS/Shared Hosting)
-
-1. **Backend**
-   ```bash
-   # SSH into server
-   ssh user@server-ip
-   
-   # Clone repo
-   git clone your-repo-url
-   cd Baat-cheet/Backend
-   
-   # Install dependencies
-   npm install
-   
-   # Create .env file
-   nano .env  # Add all environment variables
-   
-   # Start with PM2 or similar
-   npm install -g pm2
-   pm2 start server.js --name "baat-cheet-backend"
-   pm2 startup
-   pm2 save
-   ```
-
-2. **Frontend**
-   ```bash
-   cd Baat-cheet/Frontend
-   npm install
-   npm run build
-   
-   # Move dist to web server or CDN
-   ```
-
-## CORS Configuration Updates ✅
-
-**Fixed in latest code:**
-- Express CORS now reads from `CLIENT_URL` environment variable
-- Socket.io CORS now reads from `CLIENT_URL` environment variable
-- Supports multiple origins (comma-separated)
-
-Example: `CLIENT_URL=https://yourdomain.com,https://www.yourdomain.com`
-
-## Database Configuration
-
-- [ ] Create MongoDB Atlas account (or use your own MongoDB server)
-- [ ] Create a database user with appropriate permissions
-- [ ] Whitelist IP addresses on MongoDB Atlas
-- [ ] Use full connection string in `MONGODB_URI`
-
-## Testing Before Deploy
-
-1. [ ] Test all API endpoints with production domain
-2. [ ] Test WebRTC calls with different network conditions
-3. [ ] Test socket connection from frontend to backend
-4. [ ] Test image uploads to Cloudinary
-5. [ ] Verify email notifications work
-6. [ ] Test on mobile devices
-
-## Performance Checks
-
-- [ ] Frontend builds without errors: `npm run build`
-- [ ] Backend starts without errors: `npm start`
-- [ ] Database connection works
-- [ ] CORS headers are correct
-- [ ] Socket.io connections establish properly
-
-## Security Checklist
-
-- [ ] JWT_SECRET is strong (min 32 chars)
-- [ ] Never commit `.env` file
-- [ ] Use HTTPS only in production
-- [ ] Enable HTTPS for Socket.io (wss://)
-- [ ] Set secure cookies: `secure: true` for production (in middleware if needed)
-- [ ] Rate limiting configured (optional but recommended)
-- [ ] Input validation on all endpoints
-
-## Post-Deployment
-
-- [ ] Monitor logs for errors
-- [ ] Set up error tracking (Sentry, LogRocket)
-- [ ] Monitor user online status updates
-- [ ] Test video calls from real users
-- [ ] Monitor WebSocket connections
-- [ ] Set up automated backups for MongoDB
-
-## Common Issues & Solutions
-
-### "CORS error when deploying"
-- Ensure `CLIENT_URL` environment variable is set correctly
-- Check frontend domain matches exactly (including scheme and path)
-
-### "Socket connection fails in production"
-- Verify `CLIENT_URL` is set in backend
-- Ensure backend is accessible from frontend
-- Check socket.io path and transport settings
-
-### "WebRTC not working after deployment"
-- Verify STUN servers are accessible (Google's STUN servers should work)
-- Check firewall rules allow WebRTC ports
-- Test from different networks
-
-## Hosting Recommendations
-
-- **Backend**: Railway, Render, Heroku alternative, or AWS EC2
-- **Database**: MongoDB Atlas (free tier available)
-- **Storage**: Cloudinary (for images)
-- **Email**: Resend or SendGrid
-- **Frontend**: Vercel, Netlify, or same server as backend
-
----
-
-**Last Updated**: March 1, 2026
-**Status**: Ready for deployment with environment variables configured
-</file>
-
-<file path="Frontend/.env.example">
-
-</file>
-
-<file path="Frontend/src/components/CallModal.jsx">
-import { useEffect, useRef } from "react";
-import { Mic, MicOff, Phone, PhoneOff, Video, VideoOff } from "lucide-react";
-import { useCallStore } from "../store/useCallStore";
-import { useChatStore } from "../store/useChatStore";
-
-const CallModal = () => {
-  const {
-    currentCall,
-    incomingCall,
-    callStatus,
-    localStream,
-    remoteStream,
-    isMicMuted,
-    isCameraOff,
-    acceptIncomingCall,
-    rejectIncomingCall,
-    endCurrentCall,
-    toggleMute,
-    toggleCamera,
-  } = useCallStore();
-
-  const { users } = useChatStore();
-
-  const localVideoRef = useRef(null);
-  const remoteVideoRef = useRef(null);
-  const remoteAudioRef = useRef(null);
-
-  useEffect(() => {
-    if (localVideoRef.current) {
-      localVideoRef.current.srcObject = localStream || null;
-    }
-  }, [localStream]);
-
-  useEffect(() => {
-    if (remoteVideoRef.current) {
-      remoteVideoRef.current.srcObject = remoteStream || null;
-    }
-  }, [remoteStream]);
-
-  useEffect(() => {
-    if (remoteAudioRef.current) {
-      remoteAudioRef.current.srcObject = remoteStream || null;
-    }
-  }, [remoteStream]);
-
-  if (!incomingCall && !currentCall) return null;
-
-  const activeCall = currentCall || incomingCall;
-  const isVideoCall = activeCall?.callType === "video";
-  const peerId = currentCall ? currentCall.peerUserId : incomingCall?.fromUserId;
-  
-  // Get peer user details from users list
-  const peerUser = users.find(user => user._id === peerId);
-  const peerLabel = peerUser?.fullName || peerUser?.email || peerId;
-
-  return (
-    <div className="fixed inset-0 z-[100] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="w-full max-w-3xl rounded-2xl bg-base-100 border border-base-300 p-4 sm:p-6 space-y-4">
-        <div className="flex items-center justify-between">
-          <h3 className="font-semibold text-lg">{incomingCall ? "Incoming call" : "Call in progress"}</h3>
-          <span className="text-sm text-base-content/60">{callStatus}</span>
-        </div>
-
-        <p className="text-sm text-base-content/70">User: <span className="font-semibold text-base-content">{peerLabel}</span></p>
-        <audio ref={remoteAudioRef} autoPlay playsInline />
-
-        {isVideoCall ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div className="rounded-xl overflow-hidden bg-black aspect-video relative">
-              <video ref={remoteVideoRef} autoPlay playsInline className="w-full h-full object-cover" />
-              <div className="absolute top-3 left-3 bg-black/60 backdrop-blur-sm px-3 py-1.5 rounded-full">
-                <p className="text-sm font-semibold text-white">{peerLabel}</p>
-              </div>
-            </div>
-            <div className="rounded-xl overflow-hidden bg-black aspect-video relative">
-              <video ref={localVideoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
-              <div className="absolute top-3 left-3 bg-black/60 backdrop-blur-sm px-3 py-1.5 rounded-full">
-                <p className="text-sm font-semibold text-white">You</p>
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div className="rounded-xl bg-base-200 p-6 text-center text-base-content/70">
-            Voice call active
-          </div>
-        )}
-
-        {incomingCall ? (
-          <div className="flex items-center justify-center gap-3">
-            <button className="btn btn-success" onClick={acceptIncomingCall}>
-              <Phone className="size-4" /> Accept
-            </button>
-            <button className="btn btn-error" onClick={rejectIncomingCall}>
-              <PhoneOff className="size-4" /> Reject
-            </button>
-          </div>
-        ) : (
-          <div className="flex items-center justify-center gap-3 flex-wrap">
-            <button className="btn" onClick={toggleMute}>
-              {isMicMuted ? <MicOff className="size-4" /> : <Mic className="size-4" />}
-              {isMicMuted ? "Unmute" : "Mute"}
-            </button>
-
-            {isVideoCall && (
-              <button className="btn" onClick={toggleCamera}>
-                {isCameraOff ? <VideoOff className="size-4" /> : <Video className="size-4" />}
-                {isCameraOff ? "Start video" : "Stop video"}
-              </button>
-            )}
-
-            <button className="btn btn-error" onClick={() => endCurrentCall("ended") }>
-              <PhoneOff className="size-4" /> End
-            </button>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
-
-export default CallModal;
-</file>
-
-<file path="Frontend/src/store/useCallStore.js">
-import { create } from "zustand";
-import toast from "react-hot-toast";
-import { useAuthStore } from "./useAuthStore.js";
-
-const rtcConfig = {
-  iceServers: [
-    { urls: ["stun:stun.l.google.com:19302", "stun:stun1.l.google.com:19302"] },
-  ],
-};
-
-const buildCallId = () => {
-  if (typeof crypto !== "undefined" && crypto.randomUUID) {
-    return crypto.randomUUID();
-  }
-  return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
-};
-
-export const useCallStore = create((set, get) => ({
-  currentCall: null,
-  incomingCall: null,
-  callStatus: "idle",
-  localStream: null,
-  remoteStream: null,
-  peerConnection: null,
-  pendingOffer: null,
-  pendingIceCandidates: [],
-  isMicMuted: false,
-  isCameraOff: false,
-
-  resetCallState: () => {
-    const { peerConnection, localStream } = get();
-
-    if (peerConnection) {
-      peerConnection.onicecandidate = null;
-      peerConnection.ontrack = null;
-      peerConnection.onconnectionstatechange = null;
-      peerConnection.close();
-    }
-
-    if (localStream) {
-      localStream.getTracks().forEach((track) => track.stop());
-    }
-
-    set({
-      currentCall: null,
-      incomingCall: null,
-      callStatus: "idle",
-      localStream: null,
-      remoteStream: null,
-      peerConnection: null,
-      pendingOffer: null,
-      pendingIceCandidates: [],
-      isMicMuted: false,
-      isCameraOff: false,
-    });
-  },
-
-  createPeerConnection: ({ socket, callId, peerUserId, myUserId }) => {
-    const pc = new RTCPeerConnection(rtcConfig);
-
-    pc.onicecandidate = (event) => {
-      if (!event.candidate) {
-        console.log("ICE candidate gathering completed");
-        return;
-      }
-
-      console.log("Sending ICE candidate:", event.candidate);
-      socket.emit("call:ice-candidate", {
-        callId,
-        fromUserId: myUserId,
-        toUserId: peerUserId,
-        candidate: event.candidate,
-      });
-    };
-
-    pc.ontrack = (event) => {
-      console.log("Received remote track:", event.track.kind);
-      const [stream] = event.streams;
-      if (stream) {
-        console.log("Setting remote stream:", stream);
-        set({ remoteStream: stream });
-      }
-    };
-
-    pc.onconnectionstatechange = () => {
-      const state = pc.connectionState;
-      console.log("Connection state changed to:", state);
-      
-      if (state === "connected") {
-        set({ callStatus: "connected" });
-      }
-
-      if (["failed", "disconnected", "closed"].includes(state)) {
-        console.log("Call ended due to connection state:", state);
-        get().resetCallState();
-      }
-    };
-
-    pc.oniceconnectionstatechange = () => {
-      console.log("ICE connection state:", pc.iceConnectionState);
-    };
-
-    set({ peerConnection: pc });
-    return pc;
-  },
-
-  flushPendingIceCandidates: async () => {
-    const { peerConnection, pendingIceCandidates } = get();
-    if (!peerConnection || pendingIceCandidates.length === 0) return;
-
-    for (const candidate of pendingIceCandidates) {
-      try {
-        await peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
-      } catch (error) {
-        console.error("Failed to add buffered ICE candidate", error);
-      }
-    }
-
-    set({ pendingIceCandidates: [] });
-  },
-
-  processPendingOffer: async (socket) => {
-    const authUser = useAuthStore.getState().authUser;
-    const { peerConnection, currentCall, pendingOffer } = get();
-
-    if (!authUser || !peerConnection || !currentCall || !pendingOffer) {
-      console.warn("Cannot process offer - missing:", {
-        authUser: !!authUser,
-        peerConnection: !!peerConnection,
-        currentCall: !!currentCall,
-        pendingOffer: !!pendingOffer,
-      });
-      return;
-    }
-
-    try {
-      console.log("Setting remote description from offer...");
-      await peerConnection.setRemoteDescription(new RTCSessionDescription(pendingOffer));
-      
-      console.log("Creating answer...");
-      const answer = await peerConnection.createAnswer();
-      
-      console.log("Setting local description with answer...");
-      await peerConnection.setLocalDescription(answer);
-
-      console.log("Sending answer...");
-      socket.emit("call:answer", {
-        callId: currentCall.callId,
-        fromUserId: authUser._id,
-        toUserId: currentCall.peerUserId,
-        sdp: answer,
-      });
-
-      console.log("Flushing pending ICE candidates...");
-      await get().flushPendingIceCandidates();
-      set({ pendingOffer: null });
-    } catch (error) {
-      console.error("Failed to process incoming offer", error);
-      toast.error("Could not accept call.");
-      get().resetCallState();
-    }
-  },
-
-  initializeSocketListeners: (socket) => {
-    if (!socket) return;
-
-    socket.off("call:incoming");
-    socket.off("call:offer");
-    socket.off("call:answer");
-    socket.off("call:ice-candidate");
-    socket.off("call:reject");
-    socket.off("call:busy");
-    socket.off("call:end");
-    socket.off("call:unavailable");
-
-    socket.on("call:incoming", ({ callId, fromUserId, callType }) => {
-      const authUser = useAuthStore.getState().authUser;
-      const { currentCall, incomingCall } = get();
-
-      if (currentCall || incomingCall) {
-        if (authUser?._id) {
-          socket.emit("call:busy", {
-            callId,
-            fromUserId: authUser._id,
-            toUserId: fromUserId,
-          });
-        }
-        return;
-      }
-
-      set({
-        incomingCall: {
-          callId,
-          fromUserId,
-          callType,
-        },
-        callStatus: "incoming",
-      });
-    });
-
-    socket.on("call:offer", async ({ callId, fromUserId, sdp }) => {
-      console.log("Received offer from:", fromUserId);
-      set({ pendingOffer: sdp });
-
-      const { currentCall, peerConnection, localStream } = get();
-      if (
-        currentCall &&
-        currentCall.callId === callId &&
-        currentCall.direction === "incoming" &&
-        peerConnection &&
-        localStream
-      ) {
-        console.log("Processing offer immediately (already in call)");
-        await get().processPendingOffer(socket);
-      }
-
-      if (!currentCall) {
-        console.log("Storing offer for later (awaiting accept)");
-        set({
-          incomingCall: {
-            callId,
-            fromUserId,
-            callType: "video",
-          },
-          callStatus: "incoming",
-        });
-      }
-    });
-
-    socket.on("call:answer", async ({ sdp }) => {
-      const { peerConnection } = get();
-      if (!peerConnection) return;
-
-      try {
-        await peerConnection.setRemoteDescription(new RTCSessionDescription(sdp));
-        // Flush any pending ICE candidates now that remote description is set
-        await get().flushPendingIceCandidates();
-      } catch (error) {
-        console.error("Failed to set remote answer", error);
-      }
-    });
-
-    socket.on("call:ice-candidate", async ({ candidate }) => {
-      const { peerConnection } = get();
-
-      if (!peerConnection) {
-        console.warn("Received ICE candidate but no peer connection");
-        return;
-      }
-
-      if (!peerConnection.remoteDescription) {
-        console.log("Buffering ICE candidate (no remote description yet)");
-        set({ pendingIceCandidates: [...get().pendingIceCandidates, candidate] });
-        return;
-      }
-
-      try {
-        console.log("Adding ICE candidate...");
-        await peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
-      } catch (error) {
-        console.error("Failed to add ICE candidate", error);
-      }
-    });
-
-    socket.on("call:reject", () => {
-      toast("Call rejected");
-      get().resetCallState();
-    });
-
-    socket.on("call:busy", () => {
-      toast("User is busy on another call");
-      get().resetCallState();
-    });
-
-    socket.on("call:unavailable", () => {
-      toast("User is offline");
-      get().resetCallState();
-    });
-
-    socket.on("call:end", () => {
-      toast("Call ended");
-      get().resetCallState();
-    });
-  },
-
-  cleanupSocketListeners: (socket) => {
-    if (!socket) return;
-
-    socket.off("call:incoming");
-    socket.off("call:offer");
-    socket.off("call:answer");
-    socket.off("call:ice-candidate");
-    socket.off("call:reject");
-    socket.off("call:busy");
-    socket.off("call:end");
-    socket.off("call:unavailable");
-  },
-
-  startCall: async (toUserId, callType = "video") => {
-    const { authUser, socket } = useAuthStore.getState();
-    const { currentCall, incomingCall } = get();
-
-    if (!authUser || !socket) return;
-    if (currentCall || incomingCall) {
-      toast("You are already in a call");
-      return;
-    }
-
-    try {
-      const callId = buildCallId();
-      const constraints = {
-        audio: true,
-        video: callType === "video" ? { width: { min: 640 }, height: { min: 480 } } : false,
-      };
-
-      console.log("Getting user media with constraints:", constraints);
-      const localStream = await navigator.mediaDevices.getUserMedia(constraints);
-      console.log("Local stream obtained:", localStream);
-
-      const pc = get().createPeerConnection({
-        socket,
-        callId,
-        peerUserId: toUserId,
-        myUserId: authUser._id,
-      });
-
-      localStream.getTracks().forEach((track) => {
-        console.log("Adding track:", track.kind);
-        pc.addTrack(track, localStream);
-      });
-
-      set({
-        localStream,
-        currentCall: {
-          callId,
-          peerUserId: toUserId,
-          callType,
-          direction: "outgoing",
-        },
-        callStatus: "connecting",
-      });
-
-      socket.emit("call:initiate", {
-        callId,
-        fromUserId: authUser._id,
-        toUserId,
-        callType,
-      });
-
-      console.log("Creating offer...");
-      const offer = await pc.createOffer();
-      console.log("Offer created, setting local description...");
-      await pc.setLocalDescription(offer);
-      console.log("Local description set, sending offer...");
-
-      socket.emit("call:offer", {
-        callId,
-        fromUserId: authUser._id,
-        toUserId,
-        sdp: offer,
-      });
-
-      set({ callStatus: "ringing" });
-    } catch (error) {
-      console.error("Failed to start call", error);
-      toast.error("Could not start call. Check mic/camera permission.");
-      get().resetCallState();
-    }
-  },
-
-  acceptIncomingCall: async () => {
-    const { authUser, socket } = useAuthStore.getState();
-    const { incomingCall, currentCall } = get();
-
-    if (!authUser || !socket || !incomingCall || currentCall) return;
-
-    try {
-      const constraints = {
-        audio: true,
-        video: incomingCall.callType === "video" ? { width: { min: 640 }, height: { min: 480 } } : false,
-      };
-
-      console.log("Getting user media for incoming call with constraints:", constraints);
-      const localStream = await navigator.mediaDevices.getUserMedia(constraints);
-      console.log("Local stream obtained for incoming call:", localStream);
-
-      const pc = get().createPeerConnection({
-        socket,
-        callId: incomingCall.callId,
-        peerUserId: incomingCall.fromUserId,
-        myUserId: authUser._id,
-      });
-
-      localStream.getTracks().forEach((track) => {
-        console.log("Adding incoming call track:", track.kind);
-        pc.addTrack(track, localStream);
-      });
-
-      set({
-        localStream,
-        currentCall: {
-          callId: incomingCall.callId,
-          peerUserId: incomingCall.fromUserId,
-          callType: incomingCall.callType,
-          direction: "incoming",
-        },
-        incomingCall: null,
-        callStatus: "connecting",
-      });
-
-      console.log("Processing pending offer...");
-      await get().processPendingOffer(socket);
-    } catch (error) {
-      console.error("Failed to accept call", error);
-      toast.error("Could not accept call. Check mic/camera permission.");
-      get().resetCallState();
-    }
-  },
-
-  rejectIncomingCall: () => {
-    const { authUser, socket } = useAuthStore.getState();
-    const { incomingCall } = get();
-
-    if (!authUser || !socket || !incomingCall) return;
-
-    socket.emit("call:reject", {
-      callId: incomingCall.callId,
-      fromUserId: authUser._id,
-      toUserId: incomingCall.fromUserId,
-    });
-
-    get().resetCallState();
-  },
-
-  endCurrentCall: (reason = "ended") => {
-    const { authUser, socket } = useAuthStore.getState();
-    const { currentCall } = get();
-
-    if (authUser && socket && currentCall) {
-      socket.emit("call:end", {
-        callId: currentCall.callId,
-        fromUserId: authUser._id,
-        toUserId: currentCall.peerUserId,
-        reason,
-      });
-    }
-
-    get().resetCallState();
-  },
-
-  toggleMute: () => {
-    const { localStream, isMicMuted } = get();
-    if (!localStream) return;
-
-    localStream.getAudioTracks().forEach((track) => {
-      track.enabled = isMicMuted;
-    });
-
-    set({ isMicMuted: !isMicMuted });
-  },
-
-  toggleCamera: () => {
-    const { localStream, isCameraOff } = get();
-    if (!localStream) return;
-
-    localStream.getVideoTracks().forEach((track) => {
-      track.enabled = isCameraOff;
-    });
-
-    set({ isCameraOff: !isCameraOff });
-  },
-}));
-</file>
-
-<file path=".gitignore">
-# Logs
-logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
-
-node_modules
-dist
-dist-ssr
-*.local
-
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
-.DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
-
-.env
 </file>
 
 <file path="Backend/controllers/auth.controller.js">
@@ -1308,19 +513,6 @@ cloudinary.config({
 export default cloudinary;
 </file>
 
-<file path="Backend/lib/db.js">
-import mongoose from "mongoose"
-
-export const connectDB = async () => {
-  try {
-    const conn = await mongoose.connect(`${process.env.MONGODB_URI}/Baat-cheet`);
-    console.log(`MongoDB connected: ${conn.connection.host}`);
-  } catch (error) {
-    console.log("MongoDB connection error:", error);
-  }
-};
-</file>
-
 <file path="Backend/lib/sendEmail.js">
 import nodemailer from "nodemailer";
 import dotenv from "dotenv";
@@ -1429,177 +621,6 @@ export const sendResetEmail = async (to, subject, otp) => {
     throw new Error("Failed to send reset email");
   }
 };
-</file>
-
-<file path="Backend/lib/socket.js">
-import { Server } from "socket.io";
-import http from "http"
-
-import express from "express"
-
-const app = express();
-const server = http.createServer(app);
-
-
-const io = new Server(server, {
-  cors: {
-    origin: ["http://localhost:5173"], 
-  },
-});
-
-// Online users track karne ke liye: { userId: socketId }
-const userSocketMap = {};
-// Active call track karne ke liye: { callId: { callerId, calleeId, callType } }
-const activeCalls = {};
-
-// Helper function receiver ki socket ID nikalne ke liye
-export const getReceiverSocketId = (userId) => {
-  return userSocketMap[userId];
-};
-
-
-io.on("connection",(socket)=>{
-    console.log("A user connected", socket.id);
-
-    const userId = socket.handshake.query.userId;
-    if (userId && userId !== "undefined") {
-      userSocketMap[userId] = socket.id;
-      console.log("User map updated:", Object.keys(userSocketMap));
-    }
-    
-    // Broadcast online users to ALL clients including the new user
-    io.emit("getOnlineUsers", Object.keys(userSocketMap));
-    
-    // Also send to the connecting socket directly
-    socket.emit("getOnlineUsers", Object.keys(userSocketMap));
-
-    // Caller se initial call request aati hai (voice/video)
-    socket.on("call:initiate", ({ callId, fromUserId, toUserId, callType }) => {
-      const calleeSocketId = getReceiverSocketId(toUserId);
-
-      if (!calleeSocketId) {
-        io.to(socket.id).emit("call:unavailable", {
-          callId,
-          toUserId,
-          reason: "offline",
-        });
-        return;
-      }
-
-      activeCalls[callId] = {
-        callerId: fromUserId,
-        calleeId: toUserId,
-        callType,
-      };
-
-      io.to(calleeSocketId).emit("call:incoming", {
-        callId,
-        fromUserId,
-        callType,
-      });
-    });
-
-    // WebRTC offer forward karo caller -> callee
-    socket.on("call:offer", ({ callId, fromUserId, toUserId, sdp }) => {
-      const calleeSocketId = getReceiverSocketId(toUserId);
-      if (!calleeSocketId) return;
-
-      io.to(calleeSocketId).emit("call:offer", {
-        callId,
-        fromUserId,
-        sdp,
-      });
-    });
-
-    // WebRTC answer forward karo callee -> caller
-    socket.on("call:answer", ({ callId, fromUserId, toUserId, sdp }) => {
-      const callerSocketId = getReceiverSocketId(toUserId);
-      if (!callerSocketId) return;
-
-      io.to(callerSocketId).emit("call:answer", {
-        callId,
-        fromUserId,
-        sdp,
-      });
-    });
-
-    // ICE candidates dono peers ke beech relay karo
-    socket.on("call:ice-candidate", ({ callId, fromUserId, toUserId, candidate }) => {
-      const targetSocketId = getReceiverSocketId(toUserId);
-      if (!targetSocketId) return;
-
-      io.to(targetSocketId).emit("call:ice-candidate", {
-        callId,
-        fromUserId,
-        candidate,
-      });
-    });
-
-    socket.on("call:reject", ({ callId, fromUserId, toUserId }) => {
-      const callerSocketId = getReceiverSocketId(toUserId);
-      if (callerSocketId) {
-        io.to(callerSocketId).emit("call:reject", {
-          callId,
-          fromUserId,
-        });
-      }
-      delete activeCalls[callId];
-    });
-
-    socket.on("call:busy", ({ callId, fromUserId, toUserId }) => {
-      const callerSocketId = getReceiverSocketId(toUserId);
-      if (callerSocketId) {
-        io.to(callerSocketId).emit("call:busy", {
-          callId,
-          fromUserId,
-        });
-      }
-      delete activeCalls[callId];
-    });
-
-    socket.on("call:end", ({ callId, fromUserId, toUserId, reason = "ended" }) => {
-      const targetSocketId = getReceiverSocketId(toUserId);
-      if (targetSocketId) {
-        io.to(targetSocketId).emit("call:end", {
-          callId,
-          fromUserId,
-          reason,
-        });
-      }
-      delete activeCalls[callId];
-    });
-    
-    socket.on("disconnect", () => {
-     console.log("User disconnected", socket.id);
-
-     // Agar disconnect hone wala user kisi active call me tha to dusre peer ko notify karo
-     Object.entries(activeCalls).forEach(([callId, callData]) => {
-      const { callerId, calleeId } = callData;
-      const isCaller = callerId === userId;
-      const isCallee = calleeId === userId;
-      if (!isCaller && !isCallee) return;
-
-      const peerUserId = isCaller ? calleeId : callerId;
-      const peerSocketId = getReceiverSocketId(peerUserId);
-      if (peerSocketId) {
-        io.to(peerSocketId).emit("call:end", {
-          callId,
-          fromUserId: userId,
-          reason: "disconnected",
-        });
-      }
-      delete activeCalls[callId];
-     });
-
-     if (userId && userId !== "undefined") {
-      delete userSocketMap[userId];
-     }
-     io.emit("getOnlineUsers", Object.keys(userSocketMap));
-    });
-    
-})
-
-export {io,app,server}
 </file>
 
 <file path="Backend/lib/utils.js">
@@ -1806,54 +827,172 @@ router.post("/send/:id", protectRoute, sendMessage);
 export default router;
 </file>
 
-<file path="Backend/server.js">
-import express from "express"
-import cors from "cors"
-import authRouter from "./routes/auth.routes.js";
-import { connectDB } from "./lib/db.js";
-import dotenv from "dotenv";
-import cookieParser from "cookie-parser";
-import messageRouter from "./routes/message.routes.js";
-import { app,server,io } from "./lib/socket.js";
-dotenv.config(); // Ye line process.env ko populate karti hai
+<file path="DEPLOYMENT_CHECKLIST.md">
+# 🚀 Deployment Checklist for Baat-cheet
 
-import path from "path";
+## Pre-Deployment Requirements
 
-const __dirname = path.resolve();
+### Backend Setup
+- [ ] Create `.env` file in `Backend/` folder with all required variables
+- [ ] Update `MONGODB_URI` with production MongoDB connection string
+- [ ] Set `NODE_ENV=production`
+- [ ] Set `PORT=5000` (or your hosting provider's port)
+- [ ] Set `CLIENT_URL` to your frontend domain (e.g., `https://yourdomain.com`)
+- [ ] Configure Cloudinary API keys for image uploads
+- [ ] Configure email service (Resend or Nodemailer)
+- [ ] Generate and set a strong `JWT_SECRET`
 
+### Frontend Setup
+- [ ] No `.env` file needed - uses `import.meta.env.MODE`
+- [ ] Axios automatically uses `/api` in production (relative path)
+- [ ] Build with: `npm run build`
+- [ ] Verify dist folder is created
 
+## Environment Variables Needed
 
-const port = process.env.PORT;
+### Backend (.env)
+```
+MONGODB_URI=mongodb+srv://user:pass@cluster.mongodb.net
+PORT=5000
+NODE_ENV=production
+CLIENT_URL=https://yourdomain.com
+JWT_SECRET=super_secret_key_min_32_chars
+CLOUDINARY_NAME=cloudinary_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
+RESEND_API_KEY=your_resend_key
+SENDER_EMAIL=noreply@yourdomain.com
+```
 
+## Deployment Steps
 
-//middlewares
-app.use(express.json({ limit: "5mb" }));
-app.use(cookieParser());
-app.use(cors({
-    origin:"http://localhost:5173",
-    credentials:true,
-}));
+### Option 1: Deploy to Vercel/Railway/Render
 
+1. **Backend Deployment**
+   - [ ] Push code to GitHub
+   - [ ] Connect your git repo to hosting platform
+   - [ ] Add environment variables in platform dashboard
+   - [ ] Set build command: `npm install && npm start`
+   - [ ] Set start command: `npm start`
 
-app.use("/api/auth",authRouter);
-app.use("/api/messages",messageRouter);
+2. **Frontend Deployment**
+   - [ ] Build: `npm run build`
+   - [ ] Deploy `dist` folder to Vercel/Netlify
+   - [ ] Ensure backend API URL is correctly set
 
+### Option 2: Deploy to Traditional Hosting (VPS/Shared Hosting)
 
+1. **Backend**
+   ```bash
+   # SSH into server
+   ssh user@server-ip
+   
+   # Clone repo
+   git clone your-repo-url
+   cd Baat-cheet/Backend
+   
+   # Install dependencies
+   npm install
+   
+   # Create .env file
+   nano .env  # Add all environment variables
+   
+   # Start with PM2 or similar
+   npm install -g pm2
+   pm2 start server.js --name "baat-cheet-backend"
+   pm2 startup
+   pm2 save
+   ```
 
+2. **Frontend**
+   ```bash
+   cd Baat-cheet/Frontend
+   npm install
+   npm run build
+   
+   # Move dist to web server or CDN
+   ```
 
+## CORS Configuration Updates ✅
 
-if (process.env.NODE_ENV === "production") {
-  app.use(express.static(path.join(__dirname, "../Frontend/dist")));
+**Fixed in latest code:**
+- Express CORS now reads from `CLIENT_URL` environment variable
+- Socket.io CORS now reads from `CLIENT_URL` environment variable
+- Supports multiple origins (comma-separated)
 
-  app.get("*", (req, res) => {
-    res.sendFile(path.join(__dirname, "../Frontend", "dist", "index.html"));
-  });
-}
+Example: `CLIENT_URL=https://yourdomain.com,https://www.yourdomain.com`
 
-server.listen(port,async ()=>{
-    console.log(`Server listening at http://localhost:${port}`)
-    await connectDB()
-});
+## Database Configuration
+
+- [ ] Create MongoDB Atlas account (or use your own MongoDB server)
+- [ ] Create a database user with appropriate permissions
+- [ ] Whitelist IP addresses on MongoDB Atlas
+- [ ] Use full connection string in `MONGODB_URI`
+
+## Testing Before Deploy
+
+1. [ ] Test all API endpoints with production domain
+2. [ ] Test WebRTC calls with different network conditions
+3. [ ] Test socket connection from frontend to backend
+4. [ ] Test image uploads to Cloudinary
+5. [ ] Verify email notifications work
+6. [ ] Test on mobile devices
+
+## Performance Checks
+
+- [ ] Frontend builds without errors: `npm run build`
+- [ ] Backend starts without errors: `npm start`
+- [ ] Database connection works
+- [ ] CORS headers are correct
+- [ ] Socket.io connections establish properly
+
+## Security Checklist
+
+- [ ] JWT_SECRET is strong (min 32 chars)
+- [ ] Never commit `.env` file
+- [ ] Use HTTPS only in production
+- [ ] Enable HTTPS for Socket.io (wss://)
+- [ ] Set secure cookies: `secure: true` for production (in middleware if needed)
+- [ ] Rate limiting configured (optional but recommended)
+- [ ] Input validation on all endpoints
+
+## Post-Deployment
+
+- [ ] Monitor logs for errors
+- [ ] Set up error tracking (Sentry, LogRocket)
+- [ ] Monitor user online status updates
+- [ ] Test video calls from real users
+- [ ] Monitor WebSocket connections
+- [ ] Set up automated backups for MongoDB
+
+## Common Issues & Solutions
+
+### "CORS error when deploying"
+- Ensure `CLIENT_URL` environment variable is set correctly
+- Check frontend domain matches exactly (including scheme and path)
+
+### "Socket connection fails in production"
+- Verify `CLIENT_URL` is set in backend
+- Ensure backend is accessible from frontend
+- Check socket.io path and transport settings
+
+### "WebRTC not working after deployment"
+- Verify STUN servers are accessible (Google's STUN servers should work)
+- Check firewall rules allow WebRTC ports
+- Test from different networks
+
+## Hosting Recommendations
+
+- **Backend**: Railway, Render, Heroku alternative, or AWS EC2
+- **Database**: MongoDB Atlas (free tier available)
+- **Storage**: Cloudinary (for images)
+- **Email**: Resend or SendGrid
+- **Frontend**: Vercel, Netlify, or same server as backend
+
+---
+
+**Last Updated**: March 1, 2026
+**Status**: Ready for deployment with environment variables configured
 </file>
 
 <file path="Frontend/eslint.config.js">
@@ -1886,22 +1025,6 @@ export default defineConfig([
     },
   },
 ])
-</file>
-
-<file path="Frontend/index.html">
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Baat-Cheet</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
-</html>
 </file>
 
 <file path="Frontend/package.json">
@@ -1969,80 +1092,6 @@ The React Compiler is not enabled on this template because of its impact on dev 
 If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
 </file>
 
-<file path="Frontend/src/App.jsx">
-import { useEffect } from "react";
-import { Loader } from "lucide-react";
-import { Toaster } from "react-hot-toast";
-import { Routes, Route, Navigate } from "react-router-dom";
-
-import { useAuthStore } from "./store/useAuthStore";
-import { useThemeStore } from "./store/useThemeStore";
-import { useCallStore } from "./store/useCallStore";
-
-import NavBar from "./components/NavBar";
-import CallModal from "./components/CallModal";
-
-import HomePage from "./pages/HomePage";
-import SignUpPage from "./pages/SignUpPage";
-import Login from "./pages/Login";
-import VerifyEmailPage from "./pages/VerifyEmailPage";
-import ForgetPassword from "./pages/ForgetPassword";
-import ResetOtpPassword from "./pages/ResetOtpPassword";
-import ResetPasswordPage from "./pages/ResetPasswordPage";
-import ProfilePage from "./pages/ProfilePage";
-import SettingsPage from "./pages/SettingsPage";
-
-const App = () => {
-  const { authUser, checkAuth, isCheckingAuth, socket } = useAuthStore();
-  const { theme } = useThemeStore();
-  const initializeSocketListeners = useCallStore((state) => state.initializeSocketListeners);
-  const cleanupSocketListeners = useCallStore((state) => state.cleanupSocketListeners);
-
-  useEffect(() => {
-    checkAuth();
-  }, [checkAuth]);
-
-  useEffect(() => {
-    if (!socket || !authUser) return;
-
-    initializeSocketListeners(socket);
-    return () => cleanupSocketListeners(socket);
-  }, [socket, authUser, initializeSocketListeners, cleanupSocketListeners]);
-
-  if (isCheckingAuth && !authUser) {
-    return (
-      <div className="flex items-center justify-center h-screen bg-base-100">
-        <Loader className="size-10 animate-spin text-primary" />
-      </div>
-    );
-  }
-
-  return (
-    <div data-theme={theme}>
-      <NavBar />
-
-      <Routes>
-        <Route path="/" element={authUser ? <HomePage /> : <Navigate to="/login" />} />
-        <Route path="/signup" element={!authUser ? <SignUpPage /> : <Navigate to="/" />} />
-        <Route path="/login" element={!authUser ? <Login /> : <Navigate to="/" />} />
-        <Route path="/verify-email" element={!authUser ? <VerifyEmailPage /> : <Navigate to="/" />} />
-        <Route path="/forget-password" element={!authUser ? <ForgetPassword /> : <Navigate to="/" />} />
-        <Route path="/reset-otp" element={!authUser ? <ResetOtpPassword /> : <Navigate to="/" />} />
-        <Route path="/reset-password" element={!authUser ? <ResetPasswordPage /> : <Navigate to="/" />} />
-        <Route path="/profile" element={<ProfilePage />} />
-        <Route path="/settings" element={<SettingsPage />} />
-        <Route path="*" element={<Navigate to="/" />} />
-      </Routes>
-
-      {authUser && <CallModal />}
-      <Toaster position="top-center" reverseOrder={false} />
-    </div>
-  );
-};
-
-export default App;
-</file>
-
 <file path="Frontend/src/assets/react.svg">
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img" class="iconify iconify--logos" width="35.93" height="32" preserveAspectRatio="xMidYMid meet" viewBox="0 0 256 228"><path fill="#00D8FF" d="M210.483 73.824a171.49 171.49 0 0 0-8.24-2.597c.465-1.9.893-3.777 1.273-5.621c6.238-30.281 2.16-54.676-11.769-62.708c-13.355-7.7-35.196.329-57.254 19.526a171.23 171.23 0 0 0-6.375 5.848a155.866 155.866 0 0 0-4.241-3.917C100.759 3.829 77.587-4.822 63.673 3.233C50.33 10.957 46.379 33.89 51.995 62.588a170.974 170.974 0 0 0 1.892 8.48c-3.28.932-6.445 1.924-9.474 2.98C17.309 83.498 0 98.307 0 113.668c0 15.865 18.582 31.778 46.812 41.427a145.52 145.52 0 0 0 6.921 2.165a167.467 167.467 0 0 0-2.01 9.138c-5.354 28.2-1.173 50.591 12.134 58.266c13.744 7.926 36.812-.22 59.273-19.855a145.567 145.567 0 0 0 5.342-4.923a168.064 168.064 0 0 0 6.92 6.314c21.758 18.722 43.246 26.282 56.54 18.586c13.731-7.949 18.194-32.003 12.4-61.268a145.016 145.016 0 0 0-1.535-6.842c1.62-.48 3.21-.974 4.76-1.488c29.348-9.723 48.443-25.443 48.443-41.52c0-15.417-17.868-30.326-45.517-39.844Zm-6.365 70.984c-1.4.463-2.836.91-4.3 1.345c-3.24-10.257-7.612-21.163-12.963-32.432c5.106-11 9.31-21.767 12.459-31.957c2.619.758 5.16 1.557 7.61 2.4c23.69 8.156 38.14 20.213 38.14 29.504c0 9.896-15.606 22.743-40.946 31.14Zm-10.514 20.834c2.562 12.94 2.927 24.64 1.23 33.787c-1.524 8.219-4.59 13.698-8.382 15.893c-8.067 4.67-25.32-1.4-43.927-17.412a156.726 156.726 0 0 1-6.437-5.87c7.214-7.889 14.423-17.06 21.459-27.246c12.376-1.098 24.068-2.894 34.671-5.345a134.17 134.17 0 0 1 1.386 6.193ZM87.276 214.515c-7.882 2.783-14.16 2.863-17.955.675c-8.075-4.657-11.432-22.636-6.853-46.752a156.923 156.923 0 0 1 1.869-8.499c10.486 2.32 22.093 3.988 34.498 4.994c7.084 9.967 14.501 19.128 21.976 27.15a134.668 134.668 0 0 1-4.877 4.492c-9.933 8.682-19.886 14.842-28.658 17.94ZM50.35 144.747c-12.483-4.267-22.792-9.812-29.858-15.863c-6.35-5.437-9.555-10.836-9.555-15.216c0-9.322 13.897-21.212 37.076-29.293c2.813-.98 5.757-1.905 8.812-2.773c3.204 10.42 7.406 21.315 12.477 32.332c-5.137 11.18-9.399 22.249-12.634 32.792a134.718 134.718 0 0 1-6.318-1.979Zm12.378-84.26c-4.811-24.587-1.616-43.134 6.425-47.789c8.564-4.958 27.502 2.111 47.463 19.835a144.318 144.318 0 0 1 3.841 3.545c-7.438 7.987-14.787 17.08-21.808 26.988c-12.04 1.116-23.565 2.908-34.161 5.309a160.342 160.342 0 0 1-1.76-7.887Zm110.427 27.268a347.8 347.8 0 0 0-7.785-12.803c8.168 1.033 15.994 2.404 23.343 4.08c-2.206 7.072-4.956 14.465-8.193 22.045a381.151 381.151 0 0 0-7.365-13.322Zm-45.032-43.861c5.044 5.465 10.096 11.566 15.065 18.186a322.04 322.04 0 0 0-30.257-.006c4.974-6.559 10.069-12.652 15.192-18.18ZM82.802 87.83a323.167 323.167 0 0 0-7.227 13.238c-3.184-7.553-5.909-14.98-8.134-22.152c7.304-1.634 15.093-2.97 23.209-3.984a321.524 321.524 0 0 0-7.848 12.897Zm8.081 65.352c-8.385-.936-16.291-2.203-23.593-3.793c2.26-7.3 5.045-14.885 8.298-22.6a321.187 321.187 0 0 0 7.257 13.246c2.594 4.48 5.28 8.868 8.038 13.147Zm37.542 31.03c-5.184-5.592-10.354-11.779-15.403-18.433c4.902.192 9.899.29 14.978.29c5.218 0 10.376-.117 15.453-.343c-4.985 6.774-10.018 12.97-15.028 18.486Zm52.198-57.817c3.422 7.8 6.306 15.345 8.596 22.52c-7.422 1.694-15.436 3.058-23.88 4.071a382.417 382.417 0 0 0 7.859-13.026a347.403 347.403 0 0 0 7.425-13.565Zm-16.898 8.101a358.557 358.557 0 0 1-12.281 19.815a329.4 329.4 0 0 1-23.444.823c-7.967 0-15.716-.248-23.178-.732a310.202 310.202 0 0 1-12.513-19.846h.001a307.41 307.41 0 0 1-10.923-20.627a310.278 310.278 0 0 1 10.89-20.637l-.001.001a307.318 307.318 0 0 1 12.413-19.761c7.613-.576 15.42-.876 23.31-.876H128c7.926 0 15.743.303 23.354.883a329.357 329.357 0 0 1 12.335 19.695a358.489 358.489 0 0 1 11.036 20.54a329.472 329.472 0 0 1-11 20.722Zm22.56-122.124c8.572 4.944 11.906 24.881 6.52 51.026c-.344 1.668-.73 3.367-1.15 5.09c-10.622-2.452-22.155-4.275-34.23-5.408c-7.034-10.017-14.323-19.124-21.64-27.008a160.789 160.789 0 0 1 5.888-5.4c18.9-16.447 36.564-22.941 44.612-18.3ZM128 90.808c12.625 0 22.86 10.235 22.86 22.86s-10.235 22.86-22.86 22.86s-22.86-10.235-22.86-22.86s10.235-22.86 22.86-22.86Z"></path></svg>
 </file>
@@ -2087,6 +1136,130 @@ const AuthImagePattern = ({ title, subtitle }) => {
 };
 
 export default AuthImagePattern;
+</file>
+
+<file path="Frontend/src/components/CallModal.jsx">
+import { useEffect, useRef } from "react";
+import { Mic, MicOff, Phone, PhoneOff, Video, VideoOff } from "lucide-react";
+import { useCallStore } from "../store/useCallStore";
+import { useChatStore } from "../store/useChatStore";
+
+const CallModal = () => {
+  const {
+    currentCall,
+    incomingCall,
+    callStatus,
+    localStream,
+    remoteStream,
+    isMicMuted,
+    isCameraOff,
+    acceptIncomingCall,
+    rejectIncomingCall,
+    endCurrentCall,
+    toggleMute,
+    toggleCamera,
+  } = useCallStore();
+
+  const { users } = useChatStore();
+
+  const localVideoRef = useRef(null);
+  const remoteVideoRef = useRef(null);
+  const remoteAudioRef = useRef(null);
+
+  useEffect(() => {
+    if (localVideoRef.current) {
+      localVideoRef.current.srcObject = localStream || null;
+    }
+  }, [localStream]);
+
+  useEffect(() => {
+    if (remoteVideoRef.current) {
+      remoteVideoRef.current.srcObject = remoteStream || null;
+    }
+  }, [remoteStream]);
+
+  useEffect(() => {
+    if (remoteAudioRef.current) {
+      remoteAudioRef.current.srcObject = remoteStream || null;
+    }
+  }, [remoteStream]);
+
+  if (!incomingCall && !currentCall) return null;
+
+  const activeCall = currentCall || incomingCall;
+  const isVideoCall = activeCall?.callType === "video";
+  const peerId = currentCall ? currentCall.peerUserId : incomingCall?.fromUserId;
+  
+  // Get peer user details from users list
+  const peerUser = users.find(user => user._id === peerId);
+  const peerLabel = peerUser?.fullName || peerUser?.email || peerId;
+
+  return (
+    <div className="fixed inset-0 z-[100] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+      <div className="w-full max-w-3xl rounded-2xl bg-base-100 border border-base-300 p-4 sm:p-6 space-y-4">
+        <div className="flex items-center justify-between">
+          <h3 className="font-semibold text-lg">{incomingCall ? "Incoming call" : "Call in progress"}</h3>
+          <span className="text-sm text-base-content/60">{callStatus}</span>
+        </div>
+
+        <p className="text-sm text-base-content/70">User: <span className="font-semibold text-base-content">{peerLabel}</span></p>
+        <audio ref={remoteAudioRef} autoPlay playsInline />
+
+        {isVideoCall ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="rounded-xl overflow-hidden bg-black aspect-video relative">
+              <video ref={remoteVideoRef} autoPlay playsInline className="w-full h-full object-cover" />
+              <div className="absolute top-3 left-3 bg-black/60 backdrop-blur-sm px-3 py-1.5 rounded-full">
+                <p className="text-sm font-semibold text-white">{peerLabel}</p>
+              </div>
+            </div>
+            <div className="rounded-xl overflow-hidden bg-black aspect-video relative">
+              <video ref={localVideoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
+              <div className="absolute top-3 left-3 bg-black/60 backdrop-blur-sm px-3 py-1.5 rounded-full">
+                <p className="text-sm font-semibold text-white">You</p>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="rounded-xl bg-base-200 p-6 text-center text-base-content/70">
+            Voice call active
+          </div>
+        )}
+
+        {incomingCall ? (
+          <div className="flex items-center justify-center gap-3">
+            <button className="btn btn-success" onClick={acceptIncomingCall}>
+              <Phone className="size-4" /> Accept
+            </button>
+            <button className="btn btn-error" onClick={rejectIncomingCall}>
+              <PhoneOff className="size-4" /> Reject
+            </button>
+          </div>
+        ) : (
+          <div className="flex items-center justify-center gap-3 flex-wrap">
+            <button className="btn" onClick={toggleMute}>
+              {isMicMuted ? <MicOff className="size-4" /> : <Mic className="size-4" />}
+              {isMicMuted ? "Unmute" : "Mute"}
+            </button>
+
+            {isVideoCall && (
+              <button className="btn" onClick={toggleCamera}>
+                {isCameraOff ? <VideoOff className="size-4" /> : <Video className="size-4" />}
+                {isCameraOff ? "Start video" : "Stop video"}
+              </button>
+            )}
+
+            <button className="btn btn-error" onClick={() => endCurrentCall("ended") }>
+              <PhoneOff className="size-4" /> End
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default CallModal;
 </file>
 
 <file path="Frontend/src/components/ChatContainer.jsx">
@@ -2201,85 +1374,6 @@ const ChatContainer = () => {
 };
 
 export default ChatContainer;
-</file>
-
-<file path="Frontend/src/components/ChatHeader.jsx">
-import { X, Phone, Video } from "lucide-react";
-import { useAuthStore } from "../store/useAuthStore";
-import { useChatStore } from "../store/useChatStore";
-import { useCallStore } from "../store/useCallStore";
-
-const ChatHeader = () => {
-  const { selectedUser, setSelectedUser } = useChatStore();
-  const { onlineUsers } = useAuthStore();
-  const { startCall, currentCall, incomingCall } = useCallStore();
-
-  const isOnline = onlineUsers.includes(selectedUser._id);
-  const isCallBusy = Boolean(currentCall || incomingCall);
-
-  return (
-    <div className="p-3 border-b border-base-300 bg-base-100/50 backdrop-blur-md">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="relative">
-            <div className="size-10 rounded-full overflow-hidden border border-base-300 shadow-sm">
-              <img
-                src={selectedUser.profilePic || `https://api.dicebear.com/7.x/avataaars/svg?seed=${selectedUser.fullName}`}
-                alt={selectedUser.fullName}
-                className="object-cover size-full"
-              />
-            </div>
-            {isOnline && (
-              <span className="absolute bottom-0 right-0 size-3 bg-success rounded-full ring-2 ring-base-100 animate-pulse" />
-            )}
-          </div>
-
-          <div className="text-left">
-            <h3 className="font-bold text-base tracking-tight">{selectedUser.fullName}</h3>
-            <div className="flex items-center gap-1.5">
-              {isOnline ? (
-                <span className="text-[11px] text-success font-semibold flex items-center gap-1">
-                  <span className="size-1.5 bg-success rounded-full" /> Online
-                </span>
-              ) : (
-                <span className="text-[11px] text-base-content/40 font-medium">Offline</span>
-              )}
-            </div>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <button
-            title={isOnline ? "Start voice call" : "User offline"}
-            onClick={() => startCall(selectedUser._id, "voice")}
-            disabled={!isOnline || isCallBusy}
-            className="btn btn-sm btn-circle btn-ghost hover:bg-base-300 transition-colors disabled:opacity-40"
-          >
-            <Phone className="size-4 text-base-content/70" />
-          </button>
-
-          <button
-            title={isOnline ? "Start video call" : "User offline"}
-            onClick={() => startCall(selectedUser._id, "video")}
-            disabled={!isOnline || isCallBusy}
-            className="btn btn-sm btn-circle btn-ghost hover:bg-base-300 transition-colors disabled:opacity-40"
-          >
-            <Video className="size-4 text-base-content/70" />
-          </button>
-
-          <button
-            onClick={() => setSelectedUser(null)}
-            className="btn btn-sm btn-circle btn-ghost hover:bg-base-300 transition-colors"
-          >
-            <X className="size-5 text-base-content/70" />
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-export default ChatHeader;
 </file>
 
 <file path="Frontend/src/components/MessageInput.jsx">
@@ -2448,88 +1542,6 @@ const MessageInput = () => {
 };
 
 export default MessageInput;
-</file>
-
-<file path="Frontend/src/components/NavBar.jsx">
-import { Link, useLocation } from "react-router-dom";
-import { useAuthStore } from "../store/useAuthStore";
-import { LogOut, MessageSquare, Settings, User } from "lucide-react";
-
-const Navbar = () => {
-  const { logout, authUser } = useAuthStore();
-  const location = useLocation();
-
-  const isActive = (path) => location.pathname === path;
-
-  return (
-    <header
-      className="bg-base-100 border-b border-base-300 fixed w-full top-0 z-40 shadow-sm"
-    >
-      <div className="container mx-auto px-4 h-16">
-        <div className="flex items-center justify-between h-full">
-          
-          {/* LEFT: LOGO SECTION */}
-          <div className="flex items-center gap-8">
-            <Link to="/" className="flex items-center gap-2.5 transition-all active:scale-95 group">
-              <div className="size-10 rounded-xl bg-primary flex items-center justify-center shadow-md group-hover:rotate-6 transition-transform">
-                <MessageSquare className="w-6 h-6 text-primary-content" />
-              </div>
-              <span className="text-xl font-extrabold tracking-tight text-base-content uppercase">
-                Baat-<span className="text-primary">Cheet</span>
-              </span>
-            </Link>
-          </div>
-
-          {/* RIGHT: ACTIONS SECTION */}
-          <div className="flex items-center gap-2">
-            
-            {/* Settings Button */}
-            <Link
-              to={"/settings"}
-              className={`
-                btn btn-ghost btn-sm gap-2 font-semibold
-                ${isActive("/settings") ? "bg-primary/10 text-primary" : "text-base-content/70"}
-              `}
-            >
-              <Settings className="w-4 h-4" />
-              <span className="hidden sm:inline">Settings</span>
-            </Link>
-
-            {authUser && (
-              <>
-                {/* Profile Button */}
-                <Link 
-                  to={"/profile"} 
-                  className={`
-                    btn btn-ghost btn-sm gap-2 font-semibold
-                    ${isActive("/profile") ? "bg-primary/10 text-primary" : "text-base-content/70"}
-                  `}
-                >
-                  <User className="w-4 h-4" />
-                  <span className="hidden sm:inline">Profile</span>
-                </Link>
-
-                {/* Vertical Divider */}
-                <div className="w-[1px] h-6 bg-base-300 mx-1 hidden sm:block" />
-
-                {/* Logout Button */}
-                <button 
-                  className="btn btn-sm btn-ghost text-error hover:bg-error/10 gap-2 font-bold" 
-                  onClick={logout}
-                >
-                  <LogOut className="w-4 h-4" />
-                  <span className="hidden sm:inline">Logout</span>
-                </button>
-              </>
-            )}
-          </div>
-        </div>
-      </div>
-    </header>
-  );
-};
-
-export default Navbar;
 </file>
 
 <file path="Frontend/src/components/NoChatSelected.jsx">
@@ -2851,15 +1863,6 @@ export default SidebarSkeleton;
   background: hsl(var(--bc) / 0.1);
   border-radius: 10px;
 }
-</file>
-
-<file path="Frontend/src/lib/axios.js">
-import axios from "axios"
-
-export const axiosInstance = axios.create({
-    baseURL: import.meta.env.MODE === "development" ? "http://localhost:5000/api" : "/api",
-    withCredentials:true,
-});
 </file>
 
 <file path="Frontend/src/lib/utils.js">
@@ -3940,6 +2943,1208 @@ const VerifyEmailPage = () => {
 export default VerifyEmailPage;
 </file>
 
+<file path="Frontend/src/store/useCallStore.js">
+import { create } from "zustand";
+import toast from "react-hot-toast";
+import { useAuthStore } from "./useAuthStore.js";
+
+const rtcConfig = {
+  iceServers: [
+    { urls: ["stun:stun.l.google.com:19302", "stun:stun1.l.google.com:19302"] },
+  ],
+};
+
+const buildCallId = () => {
+  if (typeof crypto !== "undefined" && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+};
+
+export const useCallStore = create((set, get) => ({
+  currentCall: null,
+  incomingCall: null,
+  callStatus: "idle",
+  localStream: null,
+  remoteStream: null,
+  peerConnection: null,
+  pendingOffer: null,
+  pendingIceCandidates: [],
+  isMicMuted: false,
+  isCameraOff: false,
+
+  resetCallState: () => {
+    const { peerConnection, localStream } = get();
+
+    if (peerConnection) {
+      peerConnection.onicecandidate = null;
+      peerConnection.ontrack = null;
+      peerConnection.onconnectionstatechange = null;
+      peerConnection.close();
+    }
+
+    if (localStream) {
+      localStream.getTracks().forEach((track) => track.stop());
+    }
+
+    set({
+      currentCall: null,
+      incomingCall: null,
+      callStatus: "idle",
+      localStream: null,
+      remoteStream: null,
+      peerConnection: null,
+      pendingOffer: null,
+      pendingIceCandidates: [],
+      isMicMuted: false,
+      isCameraOff: false,
+    });
+  },
+
+  createPeerConnection: ({ socket, callId, peerUserId, myUserId }) => {
+    const pc = new RTCPeerConnection(rtcConfig);
+
+    pc.onicecandidate = (event) => {
+      if (!event.candidate) {
+        console.log("ICE candidate gathering completed");
+        return;
+      }
+
+      console.log("Sending ICE candidate:", event.candidate);
+      socket.emit("call:ice-candidate", {
+        callId,
+        fromUserId: myUserId,
+        toUserId: peerUserId,
+        candidate: event.candidate,
+      });
+    };
+
+    pc.ontrack = (event) => {
+      console.log("Received remote track:", event.track.kind);
+      const [stream] = event.streams;
+      if (stream) {
+        console.log("Setting remote stream:", stream);
+        set({ remoteStream: stream });
+      }
+    };
+
+    pc.onconnectionstatechange = () => {
+      const state = pc.connectionState;
+      console.log("Connection state changed to:", state);
+      
+      if (state === "connected") {
+        set({ callStatus: "connected" });
+      }
+
+      if (["failed", "disconnected", "closed"].includes(state)) {
+        console.log("Call ended due to connection state:", state);
+        get().resetCallState();
+      }
+    };
+
+    pc.oniceconnectionstatechange = () => {
+      console.log("ICE connection state:", pc.iceConnectionState);
+    };
+
+    set({ peerConnection: pc });
+    return pc;
+  },
+
+  flushPendingIceCandidates: async () => {
+    const { peerConnection, pendingIceCandidates } = get();
+    if (!peerConnection || pendingIceCandidates.length === 0) return;
+
+    for (const candidate of pendingIceCandidates) {
+      try {
+        await peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+      } catch (error) {
+        console.error("Failed to add buffered ICE candidate", error);
+      }
+    }
+
+    set({ pendingIceCandidates: [] });
+  },
+
+  processPendingOffer: async (socket) => {
+    const authUser = useAuthStore.getState().authUser;
+    const { peerConnection, currentCall, pendingOffer } = get();
+
+    if (!authUser || !peerConnection || !currentCall || !pendingOffer) {
+      console.warn("Cannot process offer - missing:", {
+        authUser: !!authUser,
+        peerConnection: !!peerConnection,
+        currentCall: !!currentCall,
+        pendingOffer: !!pendingOffer,
+      });
+      return;
+    }
+
+    try {
+      console.log("Setting remote description from offer...");
+      await peerConnection.setRemoteDescription(new RTCSessionDescription(pendingOffer));
+      
+      console.log("Creating answer...");
+      const answer = await peerConnection.createAnswer();
+      
+      console.log("Setting local description with answer...");
+      await peerConnection.setLocalDescription(answer);
+
+      console.log("Sending answer...");
+      socket.emit("call:answer", {
+        callId: currentCall.callId,
+        fromUserId: authUser._id,
+        toUserId: currentCall.peerUserId,
+        sdp: answer,
+      });
+
+      console.log("Flushing pending ICE candidates...");
+      await get().flushPendingIceCandidates();
+      set({ pendingOffer: null });
+    } catch (error) {
+      console.error("Failed to process incoming offer", error);
+      toast.error("Could not accept call.");
+      get().resetCallState();
+    }
+  },
+
+  initializeSocketListeners: (socket) => {
+    if (!socket) return;
+
+    socket.off("call:incoming");
+    socket.off("call:offer");
+    socket.off("call:answer");
+    socket.off("call:ice-candidate");
+    socket.off("call:reject");
+    socket.off("call:busy");
+    socket.off("call:end");
+    socket.off("call:unavailable");
+
+    socket.on("call:incoming", ({ callId, fromUserId, callType }) => {
+      const authUser = useAuthStore.getState().authUser;
+      const { currentCall, incomingCall } = get();
+
+      if (currentCall || incomingCall) {
+        if (authUser?._id) {
+          socket.emit("call:busy", {
+            callId,
+            fromUserId: authUser._id,
+            toUserId: fromUserId,
+          });
+        }
+        return;
+      }
+
+      set({
+        incomingCall: {
+          callId,
+          fromUserId,
+          callType,
+        },
+        callStatus: "incoming",
+      });
+    });
+
+    socket.on("call:offer", async ({ callId, fromUserId, sdp }) => {
+      console.log("Received offer from:", fromUserId);
+      set({ pendingOffer: sdp });
+
+      const { currentCall, peerConnection, localStream } = get();
+      if (
+        currentCall &&
+        currentCall.callId === callId &&
+        currentCall.direction === "incoming" &&
+        peerConnection &&
+        localStream
+      ) {
+        console.log("Processing offer immediately (already in call)");
+        await get().processPendingOffer(socket);
+      }
+
+      if (!currentCall) {
+        console.log("Storing offer for later (awaiting accept)");
+        set({
+          incomingCall: {
+            callId,
+            fromUserId,
+            callType: "video",
+          },
+          callStatus: "incoming",
+        });
+      }
+    });
+
+    socket.on("call:answer", async ({ sdp }) => {
+      const { peerConnection } = get();
+      if (!peerConnection) return;
+
+      try {
+        await peerConnection.setRemoteDescription(new RTCSessionDescription(sdp));
+        // Flush any pending ICE candidates now that remote description is set
+        await get().flushPendingIceCandidates();
+      } catch (error) {
+        console.error("Failed to set remote answer", error);
+      }
+    });
+
+    socket.on("call:ice-candidate", async ({ candidate }) => {
+      const { peerConnection } = get();
+
+      if (!peerConnection) {
+        console.warn("Received ICE candidate but no peer connection");
+        return;
+      }
+
+      if (!peerConnection.remoteDescription) {
+        console.log("Buffering ICE candidate (no remote description yet)");
+        set({ pendingIceCandidates: [...get().pendingIceCandidates, candidate] });
+        return;
+      }
+
+      try {
+        console.log("Adding ICE candidate...");
+        await peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+      } catch (error) {
+        console.error("Failed to add ICE candidate", error);
+      }
+    });
+
+    socket.on("call:reject", () => {
+      toast("Call rejected");
+      get().resetCallState();
+    });
+
+    socket.on("call:busy", () => {
+      toast("User is busy on another call");
+      get().resetCallState();
+    });
+
+    socket.on("call:unavailable", () => {
+      toast("User is offline");
+      get().resetCallState();
+    });
+
+    socket.on("call:end", () => {
+      toast("Call ended");
+      get().resetCallState();
+    });
+  },
+
+  cleanupSocketListeners: (socket) => {
+    if (!socket) return;
+
+    socket.off("call:incoming");
+    socket.off("call:offer");
+    socket.off("call:answer");
+    socket.off("call:ice-candidate");
+    socket.off("call:reject");
+    socket.off("call:busy");
+    socket.off("call:end");
+    socket.off("call:unavailable");
+  },
+
+  startCall: async (toUserId, callType = "video") => {
+    const { authUser, socket } = useAuthStore.getState();
+    const { currentCall, incomingCall } = get();
+
+    if (!authUser || !socket) return;
+    if (currentCall || incomingCall) {
+      toast("You are already in a call");
+      return;
+    }
+
+    try {
+      const callId = buildCallId();
+      const constraints = {
+        audio: true,
+        video: callType === "video" ? { width: { min: 640 }, height: { min: 480 } } : false,
+      };
+
+      console.log("Getting user media with constraints:", constraints);
+      const localStream = await navigator.mediaDevices.getUserMedia(constraints);
+      console.log("Local stream obtained:", localStream);
+
+      const pc = get().createPeerConnection({
+        socket,
+        callId,
+        peerUserId: toUserId,
+        myUserId: authUser._id,
+      });
+
+      localStream.getTracks().forEach((track) => {
+        console.log("Adding track:", track.kind);
+        pc.addTrack(track, localStream);
+      });
+
+      set({
+        localStream,
+        currentCall: {
+          callId,
+          peerUserId: toUserId,
+          callType,
+          direction: "outgoing",
+        },
+        callStatus: "connecting",
+      });
+
+      socket.emit("call:initiate", {
+        callId,
+        fromUserId: authUser._id,
+        toUserId,
+        callType,
+      });
+
+      console.log("Creating offer...");
+      const offer = await pc.createOffer();
+      console.log("Offer created, setting local description...");
+      await pc.setLocalDescription(offer);
+      console.log("Local description set, sending offer...");
+
+      socket.emit("call:offer", {
+        callId,
+        fromUserId: authUser._id,
+        toUserId,
+        sdp: offer,
+      });
+
+      set({ callStatus: "ringing" });
+    } catch (error) {
+      console.error("Failed to start call", error);
+      toast.error("Could not start call. Check mic/camera permission.");
+      get().resetCallState();
+    }
+  },
+
+  acceptIncomingCall: async () => {
+    const { authUser, socket } = useAuthStore.getState();
+    const { incomingCall, currentCall } = get();
+
+    if (!authUser || !socket || !incomingCall || currentCall) return;
+
+    try {
+      const constraints = {
+        audio: true,
+        video: incomingCall.callType === "video" ? { width: { min: 640 }, height: { min: 480 } } : false,
+      };
+
+      console.log("Getting user media for incoming call with constraints:", constraints);
+      const localStream = await navigator.mediaDevices.getUserMedia(constraints);
+      console.log("Local stream obtained for incoming call:", localStream);
+
+      const pc = get().createPeerConnection({
+        socket,
+        callId: incomingCall.callId,
+        peerUserId: incomingCall.fromUserId,
+        myUserId: authUser._id,
+      });
+
+      localStream.getTracks().forEach((track) => {
+        console.log("Adding incoming call track:", track.kind);
+        pc.addTrack(track, localStream);
+      });
+
+      set({
+        localStream,
+        currentCall: {
+          callId: incomingCall.callId,
+          peerUserId: incomingCall.fromUserId,
+          callType: incomingCall.callType,
+          direction: "incoming",
+        },
+        incomingCall: null,
+        callStatus: "connecting",
+      });
+
+      console.log("Processing pending offer...");
+      await get().processPendingOffer(socket);
+    } catch (error) {
+      console.error("Failed to accept call", error);
+      toast.error("Could not accept call. Check mic/camera permission.");
+      get().resetCallState();
+    }
+  },
+
+  rejectIncomingCall: () => {
+    const { authUser, socket } = useAuthStore.getState();
+    const { incomingCall } = get();
+
+    if (!authUser || !socket || !incomingCall) return;
+
+    socket.emit("call:reject", {
+      callId: incomingCall.callId,
+      fromUserId: authUser._id,
+      toUserId: incomingCall.fromUserId,
+    });
+
+    get().resetCallState();
+  },
+
+  endCurrentCall: (reason = "ended") => {
+    const { authUser, socket } = useAuthStore.getState();
+    const { currentCall } = get();
+
+    if (authUser && socket && currentCall) {
+      socket.emit("call:end", {
+        callId: currentCall.callId,
+        fromUserId: authUser._id,
+        toUserId: currentCall.peerUserId,
+        reason,
+      });
+    }
+
+    get().resetCallState();
+  },
+
+  toggleMute: () => {
+    const { localStream, isMicMuted } = get();
+    if (!localStream) return;
+
+    localStream.getAudioTracks().forEach((track) => {
+      track.enabled = isMicMuted;
+    });
+
+    set({ isMicMuted: !isMicMuted });
+  },
+
+  toggleCamera: () => {
+    const { localStream, isCameraOff } = get();
+    if (!localStream) return;
+
+    localStream.getVideoTracks().forEach((track) => {
+      track.enabled = isCameraOff;
+    });
+
+    set({ isCameraOff: !isCameraOff });
+  },
+}));
+</file>
+
+<file path="Frontend/src/store/useChatStore.js">
+import {create} from "zustand"
+import toast from "react-hot-toast";
+import { axiosInstance } from "../lib/axios.js";
+import { useAuthStore } from "./useAuthStore.js";
+
+
+
+export const useChatStore = create((set,get)=>({
+  messages: [],
+  users: [],
+  selectedUser: null,
+  isUsersLoading: false,
+  isMessagesLoading: false,
+
+  getUsers: async () => {
+    set({ isUsersLoading: true });
+    try {
+      const res = await axiosInstance.get("/messages/users");
+      set({ users: res.data });
+    } catch (error) {
+      toast.error(error.response.data.message);
+    } finally {
+      set({ isUsersLoading: false });
+    }
+  },
+
+  getMessages: async (userId) =>{
+    set({isMessagesLoading:true});
+    try{
+      const res = await axiosInstance.get(`/messages/${userId}`)
+      set({ messages: res.data });
+    }catch(error){
+      toast.error(error.response.data.message);
+    }finally{
+      set({isMessagesLoading:false});
+    }
+  },
+
+  sendMessage: async(messageData) =>{
+    const { selectedUser, messages } = get();
+     try {
+      const res = await axiosInstance.post(`/messages/send/${selectedUser._id}`, messageData);
+      set({ messages: [...messages, res.data] });
+    } catch (error) {
+      toast.error(error.response.data.message);
+    }
+
+  },
+
+subscribeToMessages: () => {
+  const { selectedUser } = get();
+  if (!selectedUser) return;
+
+  const socket = useAuthStore.getState().socket;
+
+  // 🚩 SAFETY FIRST: Pehle purana listener hatao (agar koi ho)
+  // Taaki multiple listeners na ban jayein
+  socket.off("newMessage");
+
+  socket.on("newMessage", (newMessage) => {
+    // Logic: Kya ye message usi bande ne bheja hai jisse main baat kar raha hoon?
+    const isMessageFromSelectedUser = newMessage.senderId === selectedUser._id;
+    
+    if (!isMessageFromSelectedUser) return;
+
+    // Messages array ko update karo
+    set({
+      messages: [...get().messages, newMessage],
+    });
+  });
+},
+
+unsubscribeFromMessages: () => {
+  const socket = useAuthStore.getState().socket;
+  if (socket) socket.off("newMessage");
+},
+
+setSelectedUser: (selectedUser) => set({ selectedUser }),
+
+
+})
+
+);
+</file>
+
+<file path="Frontend/src/store/useThemeStore.js">
+import { create } from "zustand";
+
+export const useThemeStore = create((set) => ({
+  // LocalStorage se theme uthao, varna default "coffee" ya "dark" rakho
+  theme: localStorage.getItem("chat-theme") || "dark",
+  
+  setTheme: (theme) => {
+    localStorage.setItem("chat-theme", theme);
+    set({ theme });
+  },
+}));
+</file>
+
+<file path=".gitignore">
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+.env*
+</file>
+
+<file path="Backend/lib/db.js">
+import mongoose from "mongoose"
+
+export const connectDB = async () => {
+  try {
+    const conn = await mongoose.connect(`${process.env.MONGODB_URI}/Baat-cheet`);
+    console.log("mongo connected")
+  } catch (error) {
+    console.log("MongoDB connection error:", error);
+  }
+};
+</file>
+
+<file path="Backend/server.js">
+import express from "express"
+import cors from "cors"
+import authRouter from "./routes/auth.routes.js";
+import { connectDB } from "./lib/db.js";
+import dotenv from "dotenv";
+import cookieParser from "cookie-parser";
+import messageRouter from "./routes/message.routes.js";
+import { app,server,io } from "./lib/socket.js";
+dotenv.config(); // Ye line process.env ko populate karti hai
+
+import path from "path";
+
+const __dirname = path.resolve();
+
+
+
+const port = process.env.PORT;
+
+
+//middlewares
+app.use(express.json({ limit: "5mb" }));
+app.use(cookieParser());
+
+// Dynamic CORS configuration for production
+// const getAllowedOrigins = () => {
+//   const nodeEnv = process.env.NODE_ENV || "development";
+  
+//   if (nodeEnv === "production") {
+//     // For production, use CLIENT_URL from environment
+//     if (process.env.CLIENT_URL) {
+//       return process.env.CLIENT_URL.split(",").map(url => url.trim());
+//     }
+//   }
+  
+//   // For development, allow localhost
+//   return ["http://localhost:5173", "http://localhost:3000"];
+// };
+
+app.use(cors({
+    origin: process.env.ClientUrl,
+    credentials: true,
+}));
+
+
+app.use("/api/auth",authRouter);
+app.use("/api/messages",messageRouter);
+
+
+
+
+
+
+server.listen(port,async ()=>{
+    console.log(`Server listening at http://localhost:${port}`)
+    await connectDB()
+});
+</file>
+
+<file path="Frontend/index.html">
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="/logo.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Baat-Cheet</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
+</file>
+
+<file path="Frontend/src/App.jsx">
+import { useEffect } from "react";
+import { Loader } from "lucide-react";
+import { Toaster } from "react-hot-toast";
+import { Routes, Route, Navigate } from "react-router-dom";
+
+import { useAuthStore } from "./store/useAuthStore";
+import { useThemeStore } from "./store/useThemeStore";
+import { useCallStore } from "./store/useCallStore";
+
+import NavBar from "./components/NavBar";
+import CallModal from "./components/CallModal";
+
+import HomePage from "./pages/HomePage";
+import SignUpPage from "./pages/SignUpPage";
+import Login from "./pages/Login";
+import VerifyEmailPage from "./pages/VerifyEmailPage";
+import ForgetPassword from "./pages/ForgetPassword";
+import ResetOtpPassword from "./pages/ResetOtpPassword";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
+import ProfilePage from "./pages/ProfilePage";
+import SettingsPage from "./pages/SettingsPage";
+
+const App = () => {
+  const { authUser, checkAuth, isCheckingAuth, socket } = useAuthStore();
+  const { theme } = useThemeStore();
+  const initializeSocketListeners = useCallStore((state) => state.initializeSocketListeners);
+  const cleanupSocketListeners = useCallStore((state) => state.cleanupSocketListeners);
+
+  useEffect(() => {
+    checkAuth();
+  }, [checkAuth]);
+
+  useEffect(() => {
+    if (!socket || !authUser) return;
+
+    initializeSocketListeners(socket);
+    return () => cleanupSocketListeners(socket);
+  }, [socket, authUser, initializeSocketListeners, cleanupSocketListeners]);
+
+  if (isCheckingAuth && !authUser) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-base-100">
+        <Loader className="size-10 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  return (
+    <div data-theme={theme}>
+      <NavBar />
+
+      <Routes>
+        <Route path="/" element={authUser ? <HomePage /> : <Navigate to="/login" />} />
+        <Route path="/signup" element={!authUser ? <SignUpPage /> : <Navigate to="/" />} />
+        <Route path="/login" element={!authUser ? <Login /> : <Navigate to="/" />} />
+        <Route path="/verify-email" element={!authUser ? <VerifyEmailPage /> : <Navigate to="/" />} />
+        <Route path="/forget-password" element={!authUser ? <ForgetPassword /> : <Navigate to="/" />} />
+        <Route path="/reset-otp" element={!authUser ? <ResetOtpPassword /> : <Navigate to="/" />} />
+        <Route path="/reset-password" element={!authUser ? <ResetPasswordPage /> : <Navigate to="/" />} />
+        <Route path="/profile" element={authUser ? <ProfilePage /> : <Navigate to="/login" />} />
+        <Route path="/settings" element={ <SettingsPage /> } />
+        <Route path="*" element={<Navigate to="/" />} />
+      </Routes>
+
+      {authUser && <CallModal />}
+      <Toaster position="top-center" reverseOrder={false} />
+    </div>
+  );
+};
+
+export default App;
+</file>
+
+<file path="Frontend/src/components/ChatHeader.jsx">
+import { X, Phone, Video } from "lucide-react";
+import { useAuthStore } from "../store/useAuthStore";
+import { useChatStore } from "../store/useChatStore";
+import { useCallStore } from "../store/useCallStore";
+
+const ChatHeader = () => {
+  const { selectedUser, setSelectedUser } = useChatStore();
+  const { onlineUsers } = useAuthStore();
+  const { startCall, currentCall, incomingCall } = useCallStore();
+
+  const isOnline = onlineUsers.includes(selectedUser._id);
+  const isCallBusy = Boolean(currentCall || incomingCall);
+
+  return (
+    <div className="p-3 border-b border-base-300 bg-base-100/50 backdrop-blur-md">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="relative">
+            <div className="size-10 rounded-full overflow-hidden border border-base-300 shadow-sm">
+              <img
+                src={selectedUser.profilePic || `https://api.dicebear.com/7.x/avataaars/svg?seed=${selectedUser.fullName}`}
+                alt={selectedUser.fullName}
+                className="object-cover size-full"
+              />
+            </div>
+            {isOnline && (
+              <span className="absolute bottom-0 right-0 size-3 bg-success rounded-full ring-2 ring-base-100 animate-pulse" />
+            )}
+          </div>
+
+          <div className="text-left">
+            <h3 className="font-bold text-base tracking-tight">{selectedUser.fullName}</h3>
+            <div className="flex items-center gap-1.5">
+              {isOnline ? (
+                <span className="text-[11px] text-success font-semibold flex items-center gap-1">
+                  <span className="size-1.5 bg-success rounded-full" /> Online
+                </span>
+              ) : (
+                <span className="text-[11px] text-base-content/40 font-medium">Offline</span>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <button
+            title={isOnline ? "Start voice call" : "User offline"}
+            onClick={() => startCall(selectedUser._id, "voice")}
+            disabled={!isOnline || isCallBusy}
+            className="btn btn-sm btn-circle btn-ghost hover:bg-base-300 transition-colors disabled:opacity-40"
+          >
+            <Phone className="size-4 text-base-content/70" />
+          </button>
+
+          <button
+            title={isOnline ? "Start video call" : "User offline"}
+            onClick={() => startCall(selectedUser._id, "video")}
+            disabled={!isOnline || isCallBusy}
+            className="btn btn-sm btn-circle btn-ghost hover:bg-base-300 transition-colors disabled:opacity-40"
+          >
+            <Video className="size-4 text-base-content/70" />
+          </button>
+
+          <button
+            onClick={() => setSelectedUser(null)}
+            className="btn btn-sm btn-circle btn-ghost hover:bg-base-300 transition-colors"
+          >
+            <X className="size-5 text-base-content/70" />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default ChatHeader;
+</file>
+
+<file path="Frontend/src/components/NavBar.jsx">
+import { Link, useLocation } from "react-router-dom";
+import { useAuthStore } from "../store/useAuthStore";
+import { LogOut, MessageSquare, Settings, User } from "lucide-react";
+import { Image } from "lucide-react";
+
+const Navbar = () => {
+  const { logout, authUser } = useAuthStore();
+  const location = useLocation();
+
+  const isActive = (path) => location.pathname === path;
+
+  return (
+    <header
+      className="bg-base-100 border-b border-base-300 fixed w-full top-0 z-40 shadow-sm"
+    >
+      <div className="container mx-auto px-4 h-16">
+        <div className="flex items-center justify-between h-full">
+          
+          {/* LEFT: LOGO SECTION */}
+          <div className="flex items-center gap-8">
+            <Link to="/" className="flex items-center gap-2.5 transition-all active:scale-95 group">
+              <img 
+                src="/logo.png" 
+                alt="Baat-Cheet Logo" 
+                className="h-15 w-auto group-hover:drop-shadow-md transition-all"
+              />
+            </Link>
+          </div>
+
+          {/* RIGHT: ACTIONS SECTION */}
+          <div className="flex items-center gap-2">
+            
+            {/* Settings Button */}
+            <Link
+              to={"/settings"}
+              className={`
+                btn btn-ghost btn-sm gap-2 font-semibold
+                ${isActive("/settings") ? "bg-primary/10 text-primary" : "text-base-content/70"}
+              `}
+            >
+              <Settings className="w-4 h-4" />
+              <span className="hidden sm:inline">Settings</span>
+            </Link>
+
+            {authUser && (
+              <>
+                {/* Profile Button */}
+                <Link 
+                  to={"/profile"} 
+                  className={`
+                    btn btn-ghost btn-sm gap-2 font-semibold
+                    ${isActive("/profile") ? "bg-primary/10 text-primary" : "text-base-content/70"}
+                  `}
+                >
+                  <User className="w-4 h-4" />
+                  <span className="hidden sm:inline">Profile</span>
+                </Link>
+
+                {/* Vertical Divider */}
+                <div className="w-[1px] h-6 bg-base-300 mx-1 hidden sm:block" />
+
+                {/* Logout Button */}
+                <button 
+                  className="btn btn-sm btn-ghost text-error hover:bg-error/10 gap-2 font-bold" 
+                  onClick={logout}
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span className="hidden sm:inline">Logout</span>
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    </header>
+  );
+};
+
+export default Navbar;
+</file>
+
+<file path="Frontend/src/lib/axios.js">
+import axios from "axios"
+
+// Get API URL from environment variable or use defaults
+const getBaseURL = () => {
+  // If VITE_API_URL is set via environment variables, use it
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL + "/api";
+  }
+  
+  // Otherwise use defaults based on mode
+  if (import.meta.env.MODE === "development") {
+    return "http://localhost:5000/api";
+  }
+  
+  return "/api";
+};
+
+export const axiosInstance = axios.create({
+    baseURL: getBaseURL(),
+    withCredentials:true,
+});
+</file>
+
+<file path="package.json">
+{
+  "name": "baat-cheet",
+  "version": "1.0.0",
+  "description": "A real-time chat application",
+  "main": "api/index.js",
+  "scripts": {
+    "build": "npm install --prefix Backend && npm install --prefix Frontend && npm run build --prefix Frontend",
+    "start": "node api/index.js",
+    "dev": "npm run dev --prefix Frontend",
+    "dev:backend": "npm run dev --prefix Backend",
+    "install": "npm install --prefix Backend && npm install --prefix Frontend"
+  },
+  "keywords": ["chat", "real-time", "socket.io"],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "engines": {
+    "node": "18.x"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cloudinary": "^2.9.0",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.6",
+    "dotenv": "^17.2.4",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^9.2.0",
+    "nodemailer": "^8.0.1",
+    "resend": "^6.9.2",
+    "socket.io": "^4.8.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.11"
+  }
+}
+</file>
+
+<file path="Frontend/vite.config.js">
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import tailwindcss from '@tailwindcss/vite'
+
+// https://vite.dev/config/
+export default defineConfig({
+  plugins: [react(), tailwindcss()],
+  define: {
+    global: 'globalThis',
+  },
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+        secure: false,
+      }
+    }
+  },
+  build: {
+    outDir: 'dist',
+    sourcemap: false,
+    minify: 'esbuild',
+  }
+})
+</file>
+
+<file path="Backend/lib/socket.js">
+import { Server } from "socket.io";
+import http from "http"
+import dotenv from "dotenv";
+import express from "express"
+dotenv.config();
+
+const app = express();
+const server = http.createServer(app);
+
+// Get allowed origins from environment variable or use defaults
+const getAllowedOrigins = () => {
+  const nodeEnv = process.env.NODE_ENV || "development";
+  
+  if (nodeEnv === "production" && process.env.CLIENT_URL) {
+    return process.env.ClientUrl.split(",").map(url => url.trim());
+  }
+  
+  // Development defaults
+  return ["http://localhost:5173"];
+};
+
+const io = new Server(server, {
+  cors: {
+    origin: getAllowedOrigins(),
+    credentials: true,
+  },
+});
+
+// Online users track karne ke liye: { userId: socketId }
+const userSocketMap = {};
+// Active call track karne ke liye: { callId: { callerId, calleeId, callType } }
+const activeCalls = {};
+
+// Helper function receiver ki socket ID nikalne ke liye
+export const getReceiverSocketId = (userId) => {
+  return userSocketMap[userId];
+};
+
+
+io.on("connection",(socket)=>{
+    console.log("A user connected", socket.id);
+
+    const userId = socket.handshake.query.userId;
+    if (userId && userId !== "undefined") {
+      userSocketMap[userId] = socket.id;
+      console.log("User map updated:", Object.keys(userSocketMap));
+    }
+    
+    // Broadcast online users to ALL clients including the new user
+    io.emit("getOnlineUsers", Object.keys(userSocketMap));
+    
+    // Also send to the connecting socket directly
+    socket.emit("getOnlineUsers", Object.keys(userSocketMap));
+
+    // Caller se initial call request aati hai (voice/video)
+    socket.on("call:initiate", ({ callId, fromUserId, toUserId, callType }) => {
+      const calleeSocketId = getReceiverSocketId(toUserId);
+
+      if (!calleeSocketId) {
+        io.to(socket.id).emit("call:unavailable", {
+          callId,
+          toUserId,
+          reason: "offline",
+        });
+        return;
+      }
+
+      activeCalls[callId] = {
+        callerId: fromUserId,
+        calleeId: toUserId,
+        callType,
+      };
+
+      io.to(calleeSocketId).emit("call:incoming", {
+        callId,
+        fromUserId,
+        callType,
+      });
+    });
+
+    // WebRTC offer forward karo caller -> callee
+    socket.on("call:offer", ({ callId, fromUserId, toUserId, sdp }) => {
+      const calleeSocketId = getReceiverSocketId(toUserId);
+      if (!calleeSocketId) return;
+
+      io.to(calleeSocketId).emit("call:offer", {
+        callId,
+        fromUserId,
+        sdp,
+      });
+    });
+
+    // WebRTC answer forward karo callee -> caller
+    socket.on("call:answer", ({ callId, fromUserId, toUserId, sdp }) => {
+      const callerSocketId = getReceiverSocketId(toUserId);
+      if (!callerSocketId) return;
+
+      io.to(callerSocketId).emit("call:answer", {
+        callId,
+        fromUserId,
+        sdp,
+      });
+    });
+
+    // ICE candidates dono peers ke beech relay karo
+    socket.on("call:ice-candidate", ({ callId, fromUserId, toUserId, candidate }) => {
+      const targetSocketId = getReceiverSocketId(toUserId);
+      if (!targetSocketId) return;
+
+      io.to(targetSocketId).emit("call:ice-candidate", {
+        callId,
+        fromUserId,
+        candidate,
+      });
+    });
+
+    socket.on("call:reject", ({ callId, fromUserId, toUserId }) => {
+      const callerSocketId = getReceiverSocketId(toUserId);
+      if (callerSocketId) {
+        io.to(callerSocketId).emit("call:reject", {
+          callId,
+          fromUserId,
+        });
+      }
+      delete activeCalls[callId];
+    });
+
+    socket.on("call:busy", ({ callId, fromUserId, toUserId }) => {
+      const callerSocketId = getReceiverSocketId(toUserId);
+      if (callerSocketId) {
+        io.to(callerSocketId).emit("call:busy", {
+          callId,
+          fromUserId,
+        });
+      }
+      delete activeCalls[callId];
+    });
+
+    socket.on("call:end", ({ callId, fromUserId, toUserId, reason = "ended" }) => {
+      const targetSocketId = getReceiverSocketId(toUserId);
+      if (targetSocketId) {
+        io.to(targetSocketId).emit("call:end", {
+          callId,
+          fromUserId,
+          reason,
+        });
+      }
+      delete activeCalls[callId];
+    });
+    
+    socket.on("disconnect", () => {
+     console.log("User disconnected", socket.id);
+
+     // Agar disconnect hone wala user kisi active call me tha to dusre peer ko notify karo
+     Object.entries(activeCalls).forEach(([callId, callData]) => {
+      const { callerId, calleeId } = callData;
+      const isCaller = callerId === userId;
+      const isCallee = calleeId === userId;
+      if (!isCaller && !isCallee) return;
+
+      const peerUserId = isCaller ? calleeId : callerId;
+      const peerSocketId = getReceiverSocketId(peerUserId);
+      if (peerSocketId) {
+        io.to(peerSocketId).emit("call:end", {
+          callId,
+          fromUserId: userId,
+          reason: "disconnected",
+        });
+      }
+      delete activeCalls[callId];
+     });
+
+     if (userId && userId !== "undefined") {
+      delete userSocketMap[userId];
+     }
+     io.emit("getOnlineUsers", Object.keys(userSocketMap));
+    });
+    
+})
+
+export {io,app,server}
+</file>
+
 <file path="Frontend/src/store/useAuthStore.js">
 // src/store/useAuthStore.js
 import { create } from "zustand";
@@ -3948,7 +4153,25 @@ import  { axiosInstance } from "../lib/axios.js"; // Axios instance with baseURL
 import toast from "react-hot-toast";
 import { io } from "socket.io-client";
 
-const BASE_URL = import.meta.env.MODE === "development" ? "http://localhost:5000" : "/";
+// Get BASE_URL from environment variable or use defaults
+const getBaseURL = () => {
+  // If VITE_API_URL is set, use it for socket connection
+  if (import.meta.env.VITE_API_URL) {
+    console.log("✅ Using VITE_API_URL:", import.meta.env.VITE_API_URL);
+    return import.meta.env.VITE_API_URL;
+  }
+  
+  // Development fallback
+  if (import.meta.env.MODE === "development") {
+    console.log("✅ Using development localhost");
+    return "http://localhost:5000";
+  }
+  
+  // Production fallback (same domain)
+  return window.location.origin;
+};
+
+const BASE_URL = getBaseURL();
 
 export const useAuthStore = create((set, get) => ({
   authUser: null,
@@ -4102,6 +4325,7 @@ export const useAuthStore = create((set, get) => ({
       existingSocket.disconnect();
     }
 
+    console.log("📡 Connecting to socket at:", BASE_URL);
     const socket = io(BASE_URL, {
       query: {
         userId: authUser._id,
@@ -4119,7 +4343,7 @@ export const useAuthStore = create((set, get) => ({
     });
 
     socket.on("connect", () => {
-      console.log("Socket connected:", socket.id);
+      console.log("✅ Socket connected:", socket.id);
     });
 
     socket.on("disconnect", () => {
@@ -4127,7 +4351,11 @@ export const useAuthStore = create((set, get) => ({
     });
 
     socket.on("reconnect", () => {
-      console.log("Socket reconnected");
+      console.log("✅ Socket reconnected");
+    });
+
+    socket.on("connect_error", (error) => {
+      console.error("❌ Socket connection error:", error);
     });
 
     set({ socket });
@@ -4139,173 +4367,6 @@ export const useAuthStore = create((set, get) => ({
     set({ socket: null });
   },
 }));
-</file>
-
-<file path="Frontend/src/store/useChatStore.js">
-import {create} from "zustand"
-import toast from "react-hot-toast";
-import { axiosInstance } from "../lib/axios.js";
-import { useAuthStore } from "./useAuthStore.js";
-
-
-
-export const useChatStore = create((set,get)=>({
-  messages: [],
-  users: [],
-  selectedUser: null,
-  isUsersLoading: false,
-  isMessagesLoading: false,
-
-  getUsers: async () => {
-    set({ isUsersLoading: true });
-    try {
-      const res = await axiosInstance.get("/messages/users");
-      set({ users: res.data });
-    } catch (error) {
-      toast.error(error.response.data.message);
-    } finally {
-      set({ isUsersLoading: false });
-    }
-  },
-
-  getMessages: async (userId) =>{
-    set({isMessagesLoading:true});
-    try{
-      const res = await axiosInstance.get(`/messages/${userId}`)
-      set({ messages: res.data });
-    }catch(error){
-      toast.error(error.response.data.message);
-    }finally{
-      set({isMessagesLoading:false});
-    }
-  },
-
-  sendMessage: async(messageData) =>{
-    const { selectedUser, messages } = get();
-     try {
-      const res = await axiosInstance.post(`/messages/send/${selectedUser._id}`, messageData);
-      set({ messages: [...messages, res.data] });
-    } catch (error) {
-      toast.error(error.response.data.message);
-    }
-
-  },
-
-subscribeToMessages: () => {
-  const { selectedUser } = get();
-  if (!selectedUser) return;
-
-  const socket = useAuthStore.getState().socket;
-
-  // 🚩 SAFETY FIRST: Pehle purana listener hatao (agar koi ho)
-  // Taaki multiple listeners na ban jayein
-  socket.off("newMessage");
-
-  socket.on("newMessage", (newMessage) => {
-    // Logic: Kya ye message usi bande ne bheja hai jisse main baat kar raha hoon?
-    const isMessageFromSelectedUser = newMessage.senderId === selectedUser._id;
-    
-    if (!isMessageFromSelectedUser) return;
-
-    // Messages array ko update karo
-    set({
-      messages: [...get().messages, newMessage],
-    });
-  });
-},
-
-unsubscribeFromMessages: () => {
-  const socket = useAuthStore.getState().socket;
-  if (socket) socket.off("newMessage");
-},
-
-setSelectedUser: (selectedUser) => set({ selectedUser }),
-
-
-})
-
-);
-</file>
-
-<file path="Frontend/src/store/useThemeStore.js">
-import { create } from "zustand";
-
-export const useThemeStore = create((set) => ({
-  // LocalStorage se theme uthao, varna default "coffee" ya "dark" rakho
-  theme: localStorage.getItem("chat-theme") || "dark",
-  
-  setTheme: (theme) => {
-    localStorage.setItem("chat-theme", theme);
-    set({ theme });
-  },
-}));
-</file>
-
-<file path="Frontend/vite.config.js">
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-import tailwindcss from '@tailwindcss/vite'
-
-// https://vite.dev/config/
-export default defineConfig({
-  plugins: [react(), tailwindcss()],
-  define: {
-    global: 'globalThis',
-  },
-  server: {
-    proxy: {
-      '/api': {
-        target: 'http://localhost:3000',
-        changeOrigin: true,
-        secure: false,
-      }
-    }
-  },
-  build: {
-    outDir: 'dist',
-    sourcemap: false,
-    minify: 'terser',
-  }
-})
-</file>
-
-<file path="package.json">
-{
-  "name": "baat-cheet",
-  "version": "1.0.0",
-  "description": "A real-time chat application",
-  "main": "api/index.js",
-  "scripts": {
-    "build": "npm install --prefix Backend && npm install --prefix Frontend && npm run build --prefix Frontend",
-    "start": "node api/index.js",
-    "dev": "npm run dev --prefix Frontend",
-    "dev:backend": "npm run dev --prefix Backend",
-    "install": "npm install --prefix Backend && npm install --prefix Frontend"
-  },
-  "keywords": ["chat", "real-time", "socket.io"],
-  "author": "",
-  "license": "ISC",
-  "type": "module",
-  "engines": {
-    "node": "18.x"
-  },
-  "dependencies": {
-    "bcryptjs": "^3.0.3",
-    "cloudinary": "^2.9.0",
-    "cookie-parser": "^1.4.7",
-    "cors": "^2.8.6",
-    "dotenv": "^17.2.4",
-    "express": "^5.2.1",
-    "jsonwebtoken": "^9.0.3",
-    "mongoose": "^9.2.0",
-    "nodemailer": "^8.0.1",
-    "resend": "^6.9.2",
-    "socket.io": "^4.8.3"
-  },
-  "devDependencies": {
-    "nodemon": "^3.1.11"
-  }
-}
 </file>
 
 </files>

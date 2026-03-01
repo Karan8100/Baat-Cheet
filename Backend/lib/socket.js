@@ -11,7 +11,7 @@ const server = http.createServer(app);
 const getAllowedOrigins = () => {
   const nodeEnv = process.env.NODE_ENV || "development";
   
-  if (nodeEnv === "production" && process.env.CLIENT_URL) {
+  if (nodeEnv === "production" && process.env.ClientUrl) {
     return process.env.ClientUrl.split(",").map(url => url.trim());
   }
   
