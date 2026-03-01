@@ -20,9 +20,25 @@ const port = process.env.PORT;
 //middlewares
 app.use(express.json({ limit: "5mb" }));
 app.use(cookieParser());
+
+// Dynamic CORS configuration for production
+// const getAllowedOrigins = () => {
+//   const nodeEnv = process.env.NODE_ENV || "development";
+  
+//   if (nodeEnv === "production") {
+//     // For production, use CLIENT_URL from environment
+//     if (process.env.CLIENT_URL) {
+//       return process.env.CLIENT_URL.split(",").map(url => url.trim());
+//     }
+//   }
+  
+//   // For development, allow localhost
+//   return ["http://localhost:5173", "http://localhost:3000"];
+// };
+
 app.use(cors({
-    origin:"http://localhost:5173",
-    credentials:true,
+    origin: process.env.ClientUrl,
+    credentials: true,
 }));
 
 
@@ -33,13 +49,6 @@ app.use("/api/messages",messageRouter);
 
 
 
-if (process.env.NODE_ENV === "production") {
-  app.use(express.static(path.join(__dirname, "../Frontend/dist")));
-
-  app.get("*", (req, res) => {
-    res.sendFile(path.join(__dirname, "../Frontend", "dist", "index.html"));
-  });
-}
 
 server.listen(port,async ()=>{
     console.log(`Server listening at http://localhost:${port}`)
