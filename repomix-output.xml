@@ -1,0 +1,4311 @@
+This file is a merged representation of the entire codebase, combined into a single document by Repomix.
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of the entire repository's contents.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files (if enabled)
+5. Multiple file entries, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+</file_summary>
+
+<directory_structure>
+.gitignore
+Backend/controllers/auth.controller.js
+Backend/controllers/message.controller.js
+Backend/lib/cloudinary.js
+Backend/lib/db.js
+Backend/lib/sendEmail.js
+Backend/lib/socket.js
+Backend/lib/utils.js
+Backend/middleware/auth.middleware.js
+Backend/models/Message.js
+Backend/models/User.js
+Backend/package.json
+Backend/routes/auth.routes.js
+Backend/routes/message.routes.js
+Backend/server.js
+DEPLOYMENT_CHECKLIST.md
+Frontend/.env.example
+Frontend/eslint.config.js
+Frontend/index.html
+Frontend/package.json
+Frontend/public/vite.svg
+Frontend/README.md
+Frontend/src/App.jsx
+Frontend/src/assets/react.svg
+Frontend/src/components/AuthImagePattern.jsx
+Frontend/src/components/CallModal.jsx
+Frontend/src/components/ChatContainer.jsx
+Frontend/src/components/ChatHeader.jsx
+Frontend/src/components/MessageInput.jsx
+Frontend/src/components/NavBar.jsx
+Frontend/src/components/NoChatSelected.jsx
+Frontend/src/components/Sidebar.jsx
+Frontend/src/components/skeleton/MessageSkeleton.jsx
+Frontend/src/components/skeleton/SideBarSkeleton.jsx
+Frontend/src/index.css
+Frontend/src/lib/axios.js
+Frontend/src/lib/utils.js
+Frontend/src/main.jsx
+Frontend/src/pages/ForgetPassword.jsx
+Frontend/src/pages/HomePage.jsx
+Frontend/src/pages/Login.jsx
+Frontend/src/pages/ProfilePage.jsx
+Frontend/src/pages/ResetOtpPassword.jsx
+Frontend/src/pages/ResetPasswordPage.jsx
+Frontend/src/pages/SettingsPage.jsx
+Frontend/src/pages/SignUpPage.jsx
+Frontend/src/pages/VerifyEmailPage.jsx
+Frontend/src/store/useAuthStore.js
+Frontend/src/store/useCallStore.js
+Frontend/src/store/useChatStore.js
+Frontend/src/store/useThemeStore.js
+Frontend/vite.config.js
+package.json
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path="DEPLOYMENT_CHECKLIST.md">
+# 🚀 Deployment Checklist for Baat-cheet
+
+## Pre-Deployment Requirements
+
+### Backend Setup
+- [ ] Create `.env` file in `Backend/` folder with all required variables
+- [ ] Update `MONGODB_URI` with production MongoDB connection string
+- [ ] Set `NODE_ENV=production`
+- [ ] Set `PORT=5000` (or your hosting provider's port)
+- [ ] Set `CLIENT_URL` to your frontend domain (e.g., `https://yourdomain.com`)
+- [ ] Configure Cloudinary API keys for image uploads
+- [ ] Configure email service (Resend or Nodemailer)
+- [ ] Generate and set a strong `JWT_SECRET`
+
+### Frontend Setup
+- [ ] No `.env` file needed - uses `import.meta.env.MODE`
+- [ ] Axios automatically uses `/api` in production (relative path)
+- [ ] Build with: `npm run build`
+- [ ] Verify dist folder is created
+
+## Environment Variables Needed
+
+### Backend (.env)
+```
+MONGODB_URI=mongodb+srv://user:pass@cluster.mongodb.net
+PORT=5000
+NODE_ENV=production
+CLIENT_URL=https://yourdomain.com
+JWT_SECRET=super_secret_key_min_32_chars
+CLOUDINARY_NAME=cloudinary_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
+RESEND_API_KEY=your_resend_key
+SENDER_EMAIL=noreply@yourdomain.com
+```
+
+## Deployment Steps
+
+### Option 1: Deploy to Vercel/Railway/Render
+
+1. **Backend Deployment**
+   - [ ] Push code to GitHub
+   - [ ] Connect your git repo to hosting platform
+   - [ ] Add environment variables in platform dashboard
+   - [ ] Set build command: `npm install && npm start`
+   - [ ] Set start command: `npm start`
+
+2. **Frontend Deployment**
+   - [ ] Build: `npm run build`
+   - [ ] Deploy `dist` folder to Vercel/Netlify
+   - [ ] Ensure backend API URL is correctly set
+
+### Option 2: Deploy to Traditional Hosting (VPS/Shared Hosting)
+
+1. **Backend**
+   ```bash
+   # SSH into server
+   ssh user@server-ip
+   
+   # Clone repo
+   git clone your-repo-url
+   cd Baat-cheet/Backend
+   
+   # Install dependencies
+   npm install
+   
+   # Create .env file
+   nano .env  # Add all environment variables
+   
+   # Start with PM2 or similar
+   npm install -g pm2
+   pm2 start server.js --name "baat-cheet-backend"
+   pm2 startup
+   pm2 save
+   ```
+
+2. **Frontend**
+   ```bash
+   cd Baat-cheet/Frontend
+   npm install
+   npm run build
+   
+   # Move dist to web server or CDN
+   ```
+
+## CORS Configuration Updates ✅
+
+**Fixed in latest code:**
+- Express CORS now reads from `CLIENT_URL` environment variable
+- Socket.io CORS now reads from `CLIENT_URL` environment variable
+- Supports multiple origins (comma-separated)
+
+Example: `CLIENT_URL=https://yourdomain.com,https://www.yourdomain.com`
+
+## Database Configuration
+
+- [ ] Create MongoDB Atlas account (or use your own MongoDB server)
+- [ ] Create a database user with appropriate permissions
+- [ ] Whitelist IP addresses on MongoDB Atlas
+- [ ] Use full connection string in `MONGODB_URI`
+
+## Testing Before Deploy
+
+1. [ ] Test all API endpoints with production domain
+2. [ ] Test WebRTC calls with different network conditions
+3. [ ] Test socket connection from frontend to backend
+4. [ ] Test image uploads to Cloudinary
+5. [ ] Verify email notifications work
+6. [ ] Test on mobile devices
+
+## Performance Checks
+
+- [ ] Frontend builds without errors: `npm run build`
+- [ ] Backend starts without errors: `npm start`
+- [ ] Database connection works
+- [ ] CORS headers are correct
+- [ ] Socket.io connections establish properly
+
+## Security Checklist
+
+- [ ] JWT_SECRET is strong (min 32 chars)
+- [ ] Never commit `.env` file
+- [ ] Use HTTPS only in production
+- [ ] Enable HTTPS for Socket.io (wss://)
+- [ ] Set secure cookies: `secure: true` for production (in middleware if needed)
+- [ ] Rate limiting configured (optional but recommended)
+- [ ] Input validation on all endpoints
+
+## Post-Deployment
+
+- [ ] Monitor logs for errors
+- [ ] Set up error tracking (Sentry, LogRocket)
+- [ ] Monitor user online status updates
+- [ ] Test video calls from real users
+- [ ] Monitor WebSocket connections
+- [ ] Set up automated backups for MongoDB
+
+## Common Issues & Solutions
+
+### "CORS error when deploying"
+- Ensure `CLIENT_URL` environment variable is set correctly
+- Check frontend domain matches exactly (including scheme and path)
+
+### "Socket connection fails in production"
+- Verify `CLIENT_URL` is set in backend
+- Ensure backend is accessible from frontend
+- Check socket.io path and transport settings
+
+### "WebRTC not working after deployment"
+- Verify STUN servers are accessible (Google's STUN servers should work)
+- Check firewall rules allow WebRTC ports
+- Test from different networks
+
+## Hosting Recommendations
+
+- **Backend**: Railway, Render, Heroku alternative, or AWS EC2
+- **Database**: MongoDB Atlas (free tier available)
+- **Storage**: Cloudinary (for images)
+- **Email**: Resend or SendGrid
+- **Frontend**: Vercel, Netlify, or same server as backend
+
+---
+
+**Last Updated**: March 1, 2026
+**Status**: Ready for deployment with environment variables configured
+</file>
+
+<file path="Frontend/.env.example">
+
+</file>
+
+<file path="Frontend/src/components/CallModal.jsx">
+import { useEffect, useRef } from "react";
+import { Mic, MicOff, Phone, PhoneOff, Video, VideoOff } from "lucide-react";
+import { useCallStore } from "../store/useCallStore";
+import { useChatStore } from "../store/useChatStore";
+
+const CallModal = () => {
+  const {
+    currentCall,
+    incomingCall,
+    callStatus,
+    localStream,
+    remoteStream,
+    isMicMuted,
+    isCameraOff,
+    acceptIncomingCall,
+    rejectIncomingCall,
+    endCurrentCall,
+    toggleMute,
+    toggleCamera,
+  } = useCallStore();
+
+  const { users } = useChatStore();
+
+  const localVideoRef = useRef(null);
+  const remoteVideoRef = useRef(null);
+  const remoteAudioRef = useRef(null);
+
+  useEffect(() => {
+    if (localVideoRef.current) {
+      localVideoRef.current.srcObject = localStream || null;
+    }
+  }, [localStream]);
+
+  useEffect(() => {
+    if (remoteVideoRef.current) {
+      remoteVideoRef.current.srcObject = remoteStream || null;
+    }
+  }, [remoteStream]);
+
+  useEffect(() => {
+    if (remoteAudioRef.current) {
+      remoteAudioRef.current.srcObject = remoteStream || null;
+    }
+  }, [remoteStream]);
+
+  if (!incomingCall && !currentCall) return null;
+
+  const activeCall = currentCall || incomingCall;
+  const isVideoCall = activeCall?.callType === "video";
+  const peerId = currentCall ? currentCall.peerUserId : incomingCall?.fromUserId;
+  
+  // Get peer user details from users list
+  const peerUser = users.find(user => user._id === peerId);
+  const peerLabel = peerUser?.fullName || peerUser?.email || peerId;
+
+  return (
+    <div className="fixed inset-0 z-[100] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+      <div className="w-full max-w-3xl rounded-2xl bg-base-100 border border-base-300 p-4 sm:p-6 space-y-4">
+        <div className="flex items-center justify-between">
+          <h3 className="font-semibold text-lg">{incomingCall ? "Incoming call" : "Call in progress"}</h3>
+          <span className="text-sm text-base-content/60">{callStatus}</span>
+        </div>
+
+        <p className="text-sm text-base-content/70">User: <span className="font-semibold text-base-content">{peerLabel}</span></p>
+        <audio ref={remoteAudioRef} autoPlay playsInline />
+
+        {isVideoCall ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="rounded-xl overflow-hidden bg-black aspect-video relative">
+              <video ref={remoteVideoRef} autoPlay playsInline className="w-full h-full object-cover" />
+              <div className="absolute top-3 left-3 bg-black/60 backdrop-blur-sm px-3 py-1.5 rounded-full">
+                <p className="text-sm font-semibold text-white">{peerLabel}</p>
+              </div>
+            </div>
+            <div className="rounded-xl overflow-hidden bg-black aspect-video relative">
+              <video ref={localVideoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
+              <div className="absolute top-3 left-3 bg-black/60 backdrop-blur-sm px-3 py-1.5 rounded-full">
+                <p className="text-sm font-semibold text-white">You</p>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="rounded-xl bg-base-200 p-6 text-center text-base-content/70">
+            Voice call active
+          </div>
+        )}
+
+        {incomingCall ? (
+          <div className="flex items-center justify-center gap-3">
+            <button className="btn btn-success" onClick={acceptIncomingCall}>
+              <Phone className="size-4" /> Accept
+            </button>
+            <button className="btn btn-error" onClick={rejectIncomingCall}>
+              <PhoneOff className="size-4" /> Reject
+            </button>
+          </div>
+        ) : (
+          <div className="flex items-center justify-center gap-3 flex-wrap">
+            <button className="btn" onClick={toggleMute}>
+              {isMicMuted ? <MicOff className="size-4" /> : <Mic className="size-4" />}
+              {isMicMuted ? "Unmute" : "Mute"}
+            </button>
+
+            {isVideoCall && (
+              <button className="btn" onClick={toggleCamera}>
+                {isCameraOff ? <VideoOff className="size-4" /> : <Video className="size-4" />}
+                {isCameraOff ? "Start video" : "Stop video"}
+              </button>
+            )}
+
+            <button className="btn btn-error" onClick={() => endCurrentCall("ended") }>
+              <PhoneOff className="size-4" /> End
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default CallModal;
+</file>
+
+<file path="Frontend/src/store/useCallStore.js">
+import { create } from "zustand";
+import toast from "react-hot-toast";
+import { useAuthStore } from "./useAuthStore.js";
+
+const rtcConfig = {
+  iceServers: [
+    { urls: ["stun:stun.l.google.com:19302", "stun:stun1.l.google.com:19302"] },
+  ],
+};
+
+const buildCallId = () => {
+  if (typeof crypto !== "undefined" && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+};
+
+export const useCallStore = create((set, get) => ({
+  currentCall: null,
+  incomingCall: null,
+  callStatus: "idle",
+  localStream: null,
+  remoteStream: null,
+  peerConnection: null,
+  pendingOffer: null,
+  pendingIceCandidates: [],
+  isMicMuted: false,
+  isCameraOff: false,
+
+  resetCallState: () => {
+    const { peerConnection, localStream } = get();
+
+    if (peerConnection) {
+      peerConnection.onicecandidate = null;
+      peerConnection.ontrack = null;
+      peerConnection.onconnectionstatechange = null;
+      peerConnection.close();
+    }
+
+    if (localStream) {
+      localStream.getTracks().forEach((track) => track.stop());
+    }
+
+    set({
+      currentCall: null,
+      incomingCall: null,
+      callStatus: "idle",
+      localStream: null,
+      remoteStream: null,
+      peerConnection: null,
+      pendingOffer: null,
+      pendingIceCandidates: [],
+      isMicMuted: false,
+      isCameraOff: false,
+    });
+  },
+
+  createPeerConnection: ({ socket, callId, peerUserId, myUserId }) => {
+    const pc = new RTCPeerConnection(rtcConfig);
+
+    pc.onicecandidate = (event) => {
+      if (!event.candidate) {
+        console.log("ICE candidate gathering completed");
+        return;
+      }
+
+      console.log("Sending ICE candidate:", event.candidate);
+      socket.emit("call:ice-candidate", {
+        callId,
+        fromUserId: myUserId,
+        toUserId: peerUserId,
+        candidate: event.candidate,
+      });
+    };
+
+    pc.ontrack = (event) => {
+      console.log("Received remote track:", event.track.kind);
+      const [stream] = event.streams;
+      if (stream) {
+        console.log("Setting remote stream:", stream);
+        set({ remoteStream: stream });
+      }
+    };
+
+    pc.onconnectionstatechange = () => {
+      const state = pc.connectionState;
+      console.log("Connection state changed to:", state);
+      
+      if (state === "connected") {
+        set({ callStatus: "connected" });
+      }
+
+      if (["failed", "disconnected", "closed"].includes(state)) {
+        console.log("Call ended due to connection state:", state);
+        get().resetCallState();
+      }
+    };
+
+    pc.oniceconnectionstatechange = () => {
+      console.log("ICE connection state:", pc.iceConnectionState);
+    };
+
+    set({ peerConnection: pc });
+    return pc;
+  },
+
+  flushPendingIceCandidates: async () => {
+    const { peerConnection, pendingIceCandidates } = get();
+    if (!peerConnection || pendingIceCandidates.length === 0) return;
+
+    for (const candidate of pendingIceCandidates) {
+      try {
+        await peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+      } catch (error) {
+        console.error("Failed to add buffered ICE candidate", error);
+      }
+    }
+
+    set({ pendingIceCandidates: [] });
+  },
+
+  processPendingOffer: async (socket) => {
+    const authUser = useAuthStore.getState().authUser;
+    const { peerConnection, currentCall, pendingOffer } = get();
+
+    if (!authUser || !peerConnection || !currentCall || !pendingOffer) {
+      console.warn("Cannot process offer - missing:", {
+        authUser: !!authUser,
+        peerConnection: !!peerConnection,
+        currentCall: !!currentCall,
+        pendingOffer: !!pendingOffer,
+      });
+      return;
+    }
+
+    try {
+      console.log("Setting remote description from offer...");
+      await peerConnection.setRemoteDescription(new RTCSessionDescription(pendingOffer));
+      
+      console.log("Creating answer...");
+      const answer = await peerConnection.createAnswer();
+      
+      console.log("Setting local description with answer...");
+      await peerConnection.setLocalDescription(answer);
+
+      console.log("Sending answer...");
+      socket.emit("call:answer", {
+        callId: currentCall.callId,
+        fromUserId: authUser._id,
+        toUserId: currentCall.peerUserId,
+        sdp: answer,
+      });
+
+      console.log("Flushing pending ICE candidates...");
+      await get().flushPendingIceCandidates();
+      set({ pendingOffer: null });
+    } catch (error) {
+      console.error("Failed to process incoming offer", error);
+      toast.error("Could not accept call.");
+      get().resetCallState();
+    }
+  },
+
+  initializeSocketListeners: (socket) => {
+    if (!socket) return;
+
+    socket.off("call:incoming");
+    socket.off("call:offer");
+    socket.off("call:answer");
+    socket.off("call:ice-candidate");
+    socket.off("call:reject");
+    socket.off("call:busy");
+    socket.off("call:end");
+    socket.off("call:unavailable");
+
+    socket.on("call:incoming", ({ callId, fromUserId, callType }) => {
+      const authUser = useAuthStore.getState().authUser;
+      const { currentCall, incomingCall } = get();
+
+      if (currentCall || incomingCall) {
+        if (authUser?._id) {
+          socket.emit("call:busy", {
+            callId,
+            fromUserId: authUser._id,
+            toUserId: fromUserId,
+          });
+        }
+        return;
+      }
+
+      set({
+        incomingCall: {
+          callId,
+          fromUserId,
+          callType,
+        },
+        callStatus: "incoming",
+      });
+    });
+
+    socket.on("call:offer", async ({ callId, fromUserId, sdp }) => {
+      console.log("Received offer from:", fromUserId);
+      set({ pendingOffer: sdp });
+
+      const { currentCall, peerConnection, localStream } = get();
+      if (
+        currentCall &&
+        currentCall.callId === callId &&
+        currentCall.direction === "incoming" &&
+        peerConnection &&
+        localStream
+      ) {
+        console.log("Processing offer immediately (already in call)");
+        await get().processPendingOffer(socket);
+      }
+
+      if (!currentCall) {
+        console.log("Storing offer for later (awaiting accept)");
+        set({
+          incomingCall: {
+            callId,
+            fromUserId,
+            callType: "video",
+          },
+          callStatus: "incoming",
+        });
+      }
+    });
+
+    socket.on("call:answer", async ({ sdp }) => {
+      const { peerConnection } = get();
+      if (!peerConnection) return;
+
+      try {
+        await peerConnection.setRemoteDescription(new RTCSessionDescription(sdp));
+        // Flush any pending ICE candidates now that remote description is set
+        await get().flushPendingIceCandidates();
+      } catch (error) {
+        console.error("Failed to set remote answer", error);
+      }
+    });
+
+    socket.on("call:ice-candidate", async ({ candidate }) => {
+      const { peerConnection } = get();
+
+      if (!peerConnection) {
+        console.warn("Received ICE candidate but no peer connection");
+        return;
+      }
+
+      if (!peerConnection.remoteDescription) {
+        console.log("Buffering ICE candidate (no remote description yet)");
+        set({ pendingIceCandidates: [...get().pendingIceCandidates, candidate] });
+        return;
+      }
+
+      try {
+        console.log("Adding ICE candidate...");
+        await peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+      } catch (error) {
+        console.error("Failed to add ICE candidate", error);
+      }
+    });
+
+    socket.on("call:reject", () => {
+      toast("Call rejected");
+      get().resetCallState();
+    });
+
+    socket.on("call:busy", () => {
+      toast("User is busy on another call");
+      get().resetCallState();
+    });
+
+    socket.on("call:unavailable", () => {
+      toast("User is offline");
+      get().resetCallState();
+    });
+
+    socket.on("call:end", () => {
+      toast("Call ended");
+      get().resetCallState();
+    });
+  },
+
+  cleanupSocketListeners: (socket) => {
+    if (!socket) return;
+
+    socket.off("call:incoming");
+    socket.off("call:offer");
+    socket.off("call:answer");
+    socket.off("call:ice-candidate");
+    socket.off("call:reject");
+    socket.off("call:busy");
+    socket.off("call:end");
+    socket.off("call:unavailable");
+  },
+
+  startCall: async (toUserId, callType = "video") => {
+    const { authUser, socket } = useAuthStore.getState();
+    const { currentCall, incomingCall } = get();
+
+    if (!authUser || !socket) return;
+    if (currentCall || incomingCall) {
+      toast("You are already in a call");
+      return;
+    }
+
+    try {
+      const callId = buildCallId();
+      const constraints = {
+        audio: true,
+        video: callType === "video" ? { width: { min: 640 }, height: { min: 480 } } : false,
+      };
+
+      console.log("Getting user media with constraints:", constraints);
+      const localStream = await navigator.mediaDevices.getUserMedia(constraints);
+      console.log("Local stream obtained:", localStream);
+
+      const pc = get().createPeerConnection({
+        socket,
+        callId,
+        peerUserId: toUserId,
+        myUserId: authUser._id,
+      });
+
+      localStream.getTracks().forEach((track) => {
+        console.log("Adding track:", track.kind);
+        pc.addTrack(track, localStream);
+      });
+
+      set({
+        localStream,
+        currentCall: {
+          callId,
+          peerUserId: toUserId,
+          callType,
+          direction: "outgoing",
+        },
+        callStatus: "connecting",
+      });
+
+      socket.emit("call:initiate", {
+        callId,
+        fromUserId: authUser._id,
+        toUserId,
+        callType,
+      });
+
+      console.log("Creating offer...");
+      const offer = await pc.createOffer();
+      console.log("Offer created, setting local description...");
+      await pc.setLocalDescription(offer);
+      console.log("Local description set, sending offer...");
+
+      socket.emit("call:offer", {
+        callId,
+        fromUserId: authUser._id,
+        toUserId,
+        sdp: offer,
+      });
+
+      set({ callStatus: "ringing" });
+    } catch (error) {
+      console.error("Failed to start call", error);
+      toast.error("Could not start call. Check mic/camera permission.");
+      get().resetCallState();
+    }
+  },
+
+  acceptIncomingCall: async () => {
+    const { authUser, socket } = useAuthStore.getState();
+    const { incomingCall, currentCall } = get();
+
+    if (!authUser || !socket || !incomingCall || currentCall) return;
+
+    try {
+      const constraints = {
+        audio: true,
+        video: incomingCall.callType === "video" ? { width: { min: 640 }, height: { min: 480 } } : false,
+      };
+
+      console.log("Getting user media for incoming call with constraints:", constraints);
+      const localStream = await navigator.mediaDevices.getUserMedia(constraints);
+      console.log("Local stream obtained for incoming call:", localStream);
+
+      const pc = get().createPeerConnection({
+        socket,
+        callId: incomingCall.callId,
+        peerUserId: incomingCall.fromUserId,
+        myUserId: authUser._id,
+      });
+
+      localStream.getTracks().forEach((track) => {
+        console.log("Adding incoming call track:", track.kind);
+        pc.addTrack(track, localStream);
+      });
+
+      set({
+        localStream,
+        currentCall: {
+          callId: incomingCall.callId,
+          peerUserId: incomingCall.fromUserId,
+          callType: incomingCall.callType,
+          direction: "incoming",
+        },
+        incomingCall: null,
+        callStatus: "connecting",
+      });
+
+      console.log("Processing pending offer...");
+      await get().processPendingOffer(socket);
+    } catch (error) {
+      console.error("Failed to accept call", error);
+      toast.error("Could not accept call. Check mic/camera permission.");
+      get().resetCallState();
+    }
+  },
+
+  rejectIncomingCall: () => {
+    const { authUser, socket } = useAuthStore.getState();
+    const { incomingCall } = get();
+
+    if (!authUser || !socket || !incomingCall) return;
+
+    socket.emit("call:reject", {
+      callId: incomingCall.callId,
+      fromUserId: authUser._id,
+      toUserId: incomingCall.fromUserId,
+    });
+
+    get().resetCallState();
+  },
+
+  endCurrentCall: (reason = "ended") => {
+    const { authUser, socket } = useAuthStore.getState();
+    const { currentCall } = get();
+
+    if (authUser && socket && currentCall) {
+      socket.emit("call:end", {
+        callId: currentCall.callId,
+        fromUserId: authUser._id,
+        toUserId: currentCall.peerUserId,
+        reason,
+      });
+    }
+
+    get().resetCallState();
+  },
+
+  toggleMute: () => {
+    const { localStream, isMicMuted } = get();
+    if (!localStream) return;
+
+    localStream.getAudioTracks().forEach((track) => {
+      track.enabled = isMicMuted;
+    });
+
+    set({ isMicMuted: !isMicMuted });
+  },
+
+  toggleCamera: () => {
+    const { localStream, isCameraOff } = get();
+    if (!localStream) return;
+
+    localStream.getVideoTracks().forEach((track) => {
+      track.enabled = isCameraOff;
+    });
+
+    set({ isCameraOff: !isCameraOff });
+  },
+}));
+</file>
+
+<file path=".gitignore">
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+.env
+</file>
+
+<file path="Backend/controllers/auth.controller.js">
+import User from "../models/User.js"
+import bcrypt from "bcryptjs"
+import { sendEmail,sendResetEmail } from "../lib/sendEmail.js";
+import { generateToken } from "../lib/utils.js";
+
+import cloudinary from "../lib/cloudinary.js";
+export const signup = async(req,res)=>{
+    const { fullName, email, password } = req.body;
+
+    try{
+     if (!fullName || !email || !password) {
+      return res.status(400).json({ message: "All fields are required" });
+     }
+
+     if (password.length < 6) {
+      return res.status(400).json({ message: "Password must be at least 6 characters" });
+    }
+
+    // 1. Check if user already exists
+    const existingUser = await User.findOne({ email });
+
+    if (existingUser) {
+      // Agar user pehle se hai aur verified hai
+      if (existingUser.isVerified) {
+        return res.status(400).json({ message: "Email already exists" });
+      } 
+      // Agar user hai par verified nahi hai, toh purana record delete karke naya bana sakte hain
+      // Ya phir isi user ka OTP update kar sakte hain
+      await User.deleteOne({ email }); 
+    }
+
+    // 2. Hash Password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+
+    // 3. Generate 6-Digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otpExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes expiry
+
+    const newUser = new User({
+        email,
+        fullName,
+        password:hashedPassword,
+        otp,
+        otpExpires,
+        
+    })
+
+     
+        await newUser.save();
+
+       // 2. Mailtrap sendEmail call
+    try {
+      await sendEmail(email, "Verify your Account", otp);
+      res.status(201).json({
+        success: true,
+        message: "OTP sent to your email!",
+        email: newUser.email,
+      });
+    } catch (emailError) {
+      await User.deleteOne({ email: newUser.email });
+      return res.status(500).json({ message: "Error sending email" });
+    }
+
+
+      
+    
+    
+
+    }catch(error){
+      console.log("Error in signup controller", error.message);
+      res.status(500).json({ message: "Internal Server Error" });
+    }
+}
+
+export const verifyEmail = async (req, res) => {
+  const { email ,otp } = req.body;
+  try {
+    const user = await User.findOne({ 
+      email,
+      otp, 
+      otpExpires: { $gt: Date.now() } // Check if OTP is not expired
+    });
+
+    if (!user) {
+      return res.status(400).json({ message: "Invalid or expired OTP" });
+    }
+
+    user.isVerified = true;
+    user.otp = undefined; // Clear OTP fields
+    user.otpExpires = undefined;
+    await user.save();
+
+    // AB GENERATE KARO TOKEN
+    generateToken(user._id, res);
+
+    res.status(201).json({
+        _id: user._id,
+        fullName: user.fullName,
+        email: user.email,
+        profilePic: user.profilePic,
+        isVerified: user.isVerified
+      });
+  } catch (error) {
+    res.status(500).json({ message: "error while verifying otp" });
+  }
+};
+
+export const login = async(req,res)=>{
+    const { email, password } = req.body;
+    try{
+      if (!email || !password) {
+         return res.status(400).json({ message: "All fields are required" });
+       }
+       const user = await User.findOne({ email });
+
+       if (!user) {
+        return res.status(401).json({ message: "Invalid credentials" });
+       }
+
+        const isPasswordCorrect = await bcrypt.compare(password, user.password);
+        if(!isPasswordCorrect){
+            return res.status(401).json({ message: "Invalid credentials" })
+        }
+
+        if(!user.isVerified){
+          return res.status(400).json({ 
+          message: "Your email is not verified. Please verify it first.",
+          notVerified: true // Frontend ko hint dene ke liye
+         });
+        }
+
+        generateToken(user._id, res);
+
+      res.status(200).json({
+        _id: user._id,
+        fullName: user.fullName,
+        email: user.email,
+        profilePic: user.profilePic,
+      });
+    }catch(error){
+        console.log("Error in login controller", error.message);
+        res.status(500).json({ message: "Internal Server Error" });
+    }
+}
+
+export const forgotPassword = async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    // 1. Generate 6-digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // 2. Save OTP and Expiry in DB
+    user.resetPasswordOTP = otp;
+    user.resetPasswordOTPExpires = Date.now() + 15 * 60 * 1000; // 15 mins expiry
+    await user.save();
+
+    // 3. Send Email using your Resend utility
+    try {
+      await sendResetEmail(email, "Password Reset OTP", otp);
+      return res.json({ success: true, message: "OTP sent to your email" });
+    } catch (mailError) {
+      return res.json({ success: false, message: "Error sending email" });
+    }
+
+  } catch (error) {
+    res.json({ success: false, message: error.message });
+  }
+};
+
+// Step 2: OTP Verify karne ke liye
+export const verifyResetOtp = async (req, res) => {
+  const { email, otp } = req.body;
+
+  try {
+    if (!email || !otp) {
+      return res.status(400).json({ success: false, message: "Email and OTP are required" });
+    }
+
+    const user = await User.findOne({
+      email,
+      resetPasswordOTP: otp,
+      resetPasswordOTPExpires: { $gt: Date.now() }, // Expiry check
+    });
+
+    if (!user) {
+      return res.status(400).json({ success: false, message: "Invalid or expired OTP" });
+    }
+
+    // Agar sab sahi hai
+    res.status(200).json({ success: true, message: "OTP verified successfully. Proceed to reset password." });
+
+  } catch (error) {
+    console.log("Error in verifyResetOtp:", error.message);
+    res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
+};
+
+
+
+export const resetPassword = async (req,res) =>{
+    const {email,otp,newPassword} = req.body;
+    try{
+      
+
+    if (!email || !otp || !newPassword) {
+    return res.json({ success: false, message: "All fields are required" });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({ success: false, message: "Password must be at least 6 characters" });
+    }
+
+    const user = await User.findOne({
+      email,
+      resetPasswordOTP: otp,
+      resetPasswordOTPExpires: { $gt: Date.now() }, // Expiry check
+    })
+
+    if (!user) {
+      return res.status(400).json({ success: false, message: "Invalid or expired OTP" });
+    }
+
+    // 2. Hash the new password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+
+    user.password = hashedPassword;
+    user.resetPasswordOTP = undefined;
+    user.resetPasswordOTPExpires = undefined;
+    await user.save();
+
+    return res.json({ success: true, message: "Password reset successful! You can now login." });
+  
+    }catch(error){
+      
+      res.json({ success: false, message: error.message });
+    }
+} 
+
+
+
+
+export const logout = (req, res) => {
+  try {
+    res.cookie("jwt", "", { maxAge: 0 });
+    res.status(200).json({ message: "Logged out successfully" });
+  } catch (error) {
+    console.log("Error in logout controller", error.message);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+export const checkAuth = (req, res) => {
+  try {
+    // req.user protectRoute middleware se aata hai
+    res.status(200).json(req.user);
+  } catch (error) {
+    console.log("Error in checkAuth controller", error.message);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+
+export const updateProfile = async (req, res) => {
+  try {
+    const { profilePic } = req.body;
+    const userId = req.user._id;
+
+    if (!profilePic) {
+      return res.status(400).json({ message: "Profile pic is required" });
+    }
+
+    // 1. Pehle current user ka data nikaalo purani photo check karne ke liye
+    const currentUser = await User.findById(userId);
+    
+    // 2. Agar purani photo hai, toh use Cloudinary se delete karo
+    // (Taaki storage waste na ho)
+    if (currentUser.profilePic) {
+      try {
+        // secure_url se public_id nikalna padta hai delete karne ke liye
+        const publicId = currentUser.profilePic.split("/").pop().split(".")[0];
+        await cloudinary.uploader.destroy(publicId);
+      } catch (delError) {
+        console.log("Old image delete failed (Optional):", delError.message);
+      }
+    }
+
+    // 3. Nayi image upload karo
+    const uploadResponse = await cloudinary.uploader.upload(profilePic, {
+      folder: "chat_avatars", // Images ko organize karne ke liye folder
+    });
+
+    // 4. DB update karo
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { profilePic: uploadResponse.secure_url },
+      { new: true }
+    ).select("-password"); // Password ko response mein mat bhejo (Security!)
+
+    res.status(200).json(updatedUser);
+  } catch (error) {
+    console.log("error in update profile:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+</file>
+
+<file path="Backend/controllers/message.controller.js">
+import User from "../models/User.js";
+import Message from "../models/Message.js";
+import cloudinary from "../lib/cloudinary.js";
+import { getReceiverSocketId ,io} from "../lib/socket.js";
+//import { getReceiverSocketId, io } from "../lib/socket.js";
+
+export const getUsersForSidebar = async (req, res) => {
+    try{
+      const loggedInUserId = req.user._id;
+      // Saare users fetch karo except current user
+      const filteredUsers = await User.find({ _id: { $ne: loggedInUserId } }).select("-password");
+      res.status(200).json(filteredUsers);
+
+    }catch(error){
+      console.error("Error in getUsersForSidebar: ", error.message);
+      res.status(500).json({ error: "Internal server error" });
+    }
+}
+  
+
+export const getMessages = async(req,res)=>{
+    try {
+    const { id: userToChatId } = req.params;
+    const myId = req.user._id;
+
+    const messages = await Message.find({
+      $or: [
+        { senderId: myId, receiverId: userToChatId },
+        { senderId: userToChatId, receiverId: myId },
+      ],
+    });
+
+    res.status(200).json(messages);
+  } catch (error) {
+    console.log("Error in getMessages controller: ", error.message);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+export const sendMessage = async(req,res)=>{
+    try{
+      const {text,image } = req.body;
+      const {id:receiverId} = req.params;
+      const senderId = req.user._id;
+
+      let imageUrl;
+      if (image) {
+      const uploadResponse = await cloudinary.uploader.upload(image);
+      imageUrl = uploadResponse.secure_url;
+
+     }
+  const newMessage = new Message({
+    senderId,
+    receiverId,
+    text,
+    image: imageUrl,
+  });
+
+     await newMessage.save();
+
+     // REAL-TIME LOGIC START
+    const receiverSocketId = getReceiverSocketId(receiverId);
+    if (receiverSocketId) {
+      // Sirf receiver ko message bhejo (Private Chat)
+      io.to(receiverSocketId).emit("newMessage", newMessage);
+    }
+
+     res.status(201).json(newMessage);
+    }catch(error){
+       console.log("Error in sendMessage controller: ", error.message);
+       res.status(500).json({ error: "Internal server error" });
+    }
+}
+</file>
+
+<file path="Backend/lib/cloudinary.js">
+import { v2 as cloudinary } from "cloudinary";
+
+import { config } from "dotenv";
+
+config();
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+export default cloudinary;
+</file>
+
+<file path="Backend/lib/db.js">
+import mongoose from "mongoose"
+
+export const connectDB = async () => {
+  try {
+    const conn = await mongoose.connect(`${process.env.MONGODB_URI}/Baat-cheet`);
+    console.log(`MongoDB connected: ${conn.connection.host}`);
+  } catch (error) {
+    console.log("MongoDB connection error:", error);
+  }
+};
+</file>
+
+<file path="Backend/lib/sendEmail.js">
+import nodemailer from "nodemailer";
+import dotenv from "dotenv";
+
+dotenv.config();
+
+// 1. Transporter Setup (Gmail ke liye)
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.GMAIL_USER, // Tera Gmail (e.g., upadhyaykaran04@gmail.com)
+    pass: process.env.GMAIL_APP_PASSWORD, // 16-digit App Password
+  },
+});
+
+
+export const sendEmail = async (to, subject, otp) => {
+  try {
+    console.log(`Sending verification email to: ${to}`);
+
+    const mailOptions = {
+      from: `"Baat-Cheet Support" <${process.env.GMAIL_USER}>`,
+      to: to,
+      subject: subject,
+      html: `
+        <div style="font-family: Arial, sans-serif; background-color:#f4f4f4; padding:40px;">
+          <div style="max-width:500px; margin:auto; background:white; padding:30px; border-radius:10px; text-align:center;">
+            <h2 style="color:#333;">Verify Your Email</h2>
+            <p style="color:#555; font-size:15px;">
+              Thank you for registering. Please use the OTP below to verify your account.
+            </p>
+            <div style="margin:30px 0;">
+              <span style="font-size:28px; letter-spacing:6px; font-weight:bold; color:#4F46E5; background:#EEF2FF; padding:12px 20px; border-radius:8px; display:inline-block;">
+                ${otp}
+              </span>
+            </div>
+            <p style="color:#777; font-size:14px;">
+              This code will expire in <strong>10 minutes</strong>.
+            </p>
+            <hr style="margin:25px 0; border:none; border-top:1px solid #eee;" />
+            <p style="font-size:12px; color:#999;">
+              If you did not create this account, you can safely ignore this email.
+            </p>
+          </div>
+        </div>
+      `,
+    };
+    const info = await transporter.sendMail(mailOptions);
+    console.log("✅ Verification email sent:", info.response);
+    return info;
+    }
+    
+  
+
+   
+   catch (error) {
+    console.error(" Nodemailer Error:", error);
+    throw new Error("Failed to send email");
+  }
+};
+
+// 3. Reset Password Email Function (Mailtrap Edition)
+export const sendResetEmail = async (to, subject, otp) => {
+
+
+  try {
+    console.log(` Sending reset email to: ${to}`);
+
+    const mailOptions = {
+      from: `"Baat-Cheet Support" <${process.env.GMAIL_USER}>`,
+      to: to,
+      subject: subject || "reset password otp",
+      html: `
+        <div style="font-family: Arial, sans-serif; background-color:#f4f4f4; padding:40px;">
+          <div style="max-width:500px; margin:auto; background:white; padding:30px; border-radius:10px; text-align:center;">
+            <h2 style="color:#333;">Password Reset Request</h2>
+            <p style="color:#555; font-size:15px;">
+              We received a request to reset your password. Use the OTP below to proceed.
+            </p>
+            <div style="margin:30px 0;">
+              <span style="font-size:28px; letter-spacing:6px; font-weight:bold; color:#EF4444; background:#FEF2F2; padding:12px 20px; border-radius:8px; display:inline-block;">
+                ${otp}
+              </span>
+            </div>
+            <p style="color:#777; font-size:14px;">
+              This code will expire in <strong>10 minutes</strong>.
+            </p>
+            <hr style="margin:25px 0; border: none; border-top: 1px solid #eee;" />
+            <p style="font-size:12px; color:#999;">
+              If you didn't request this, you can safely ignore this email.
+            </p>
+          </div>
+        </div>
+      `,
+
+    };
+    const info = await transporter.sendMail(mailOptions);
+    console.log("Reset email sent:", info.response);
+    return info;
+
+
+
+    
+  } catch (error) {
+    console.error(" Reset Email Error:", error);
+    throw new Error("Failed to send reset email");
+  }
+};
+</file>
+
+<file path="Backend/lib/socket.js">
+import { Server } from "socket.io";
+import http from "http"
+
+import express from "express"
+
+const app = express();
+const server = http.createServer(app);
+
+
+const io = new Server(server, {
+  cors: {
+    origin: ["http://localhost:5173"], 
+  },
+});
+
+// Online users track karne ke liye: { userId: socketId }
+const userSocketMap = {};
+// Active call track karne ke liye: { callId: { callerId, calleeId, callType } }
+const activeCalls = {};
+
+// Helper function receiver ki socket ID nikalne ke liye
+export const getReceiverSocketId = (userId) => {
+  return userSocketMap[userId];
+};
+
+
+io.on("connection",(socket)=>{
+    console.log("A user connected", socket.id);
+
+    const userId = socket.handshake.query.userId;
+    if (userId && userId !== "undefined") {
+      userSocketMap[userId] = socket.id;
+      console.log("User map updated:", Object.keys(userSocketMap));
+    }
+    
+    // Broadcast online users to ALL clients including the new user
+    io.emit("getOnlineUsers", Object.keys(userSocketMap));
+    
+    // Also send to the connecting socket directly
+    socket.emit("getOnlineUsers", Object.keys(userSocketMap));
+
+    // Caller se initial call request aati hai (voice/video)
+    socket.on("call:initiate", ({ callId, fromUserId, toUserId, callType }) => {
+      const calleeSocketId = getReceiverSocketId(toUserId);
+
+      if (!calleeSocketId) {
+        io.to(socket.id).emit("call:unavailable", {
+          callId,
+          toUserId,
+          reason: "offline",
+        });
+        return;
+      }
+
+      activeCalls[callId] = {
+        callerId: fromUserId,
+        calleeId: toUserId,
+        callType,
+      };
+
+      io.to(calleeSocketId).emit("call:incoming", {
+        callId,
+        fromUserId,
+        callType,
+      });
+    });
+
+    // WebRTC offer forward karo caller -> callee
+    socket.on("call:offer", ({ callId, fromUserId, toUserId, sdp }) => {
+      const calleeSocketId = getReceiverSocketId(toUserId);
+      if (!calleeSocketId) return;
+
+      io.to(calleeSocketId).emit("call:offer", {
+        callId,
+        fromUserId,
+        sdp,
+      });
+    });
+
+    // WebRTC answer forward karo callee -> caller
+    socket.on("call:answer", ({ callId, fromUserId, toUserId, sdp }) => {
+      const callerSocketId = getReceiverSocketId(toUserId);
+      if (!callerSocketId) return;
+
+      io.to(callerSocketId).emit("call:answer", {
+        callId,
+        fromUserId,
+        sdp,
+      });
+    });
+
+    // ICE candidates dono peers ke beech relay karo
+    socket.on("call:ice-candidate", ({ callId, fromUserId, toUserId, candidate }) => {
+      const targetSocketId = getReceiverSocketId(toUserId);
+      if (!targetSocketId) return;
+
+      io.to(targetSocketId).emit("call:ice-candidate", {
+        callId,
+        fromUserId,
+        candidate,
+      });
+    });
+
+    socket.on("call:reject", ({ callId, fromUserId, toUserId }) => {
+      const callerSocketId = getReceiverSocketId(toUserId);
+      if (callerSocketId) {
+        io.to(callerSocketId).emit("call:reject", {
+          callId,
+          fromUserId,
+        });
+      }
+      delete activeCalls[callId];
+    });
+
+    socket.on("call:busy", ({ callId, fromUserId, toUserId }) => {
+      const callerSocketId = getReceiverSocketId(toUserId);
+      if (callerSocketId) {
+        io.to(callerSocketId).emit("call:busy", {
+          callId,
+          fromUserId,
+        });
+      }
+      delete activeCalls[callId];
+    });
+
+    socket.on("call:end", ({ callId, fromUserId, toUserId, reason = "ended" }) => {
+      const targetSocketId = getReceiverSocketId(toUserId);
+      if (targetSocketId) {
+        io.to(targetSocketId).emit("call:end", {
+          callId,
+          fromUserId,
+          reason,
+        });
+      }
+      delete activeCalls[callId];
+    });
+    
+    socket.on("disconnect", () => {
+     console.log("User disconnected", socket.id);
+
+     // Agar disconnect hone wala user kisi active call me tha to dusre peer ko notify karo
+     Object.entries(activeCalls).forEach(([callId, callData]) => {
+      const { callerId, calleeId } = callData;
+      const isCaller = callerId === userId;
+      const isCallee = calleeId === userId;
+      if (!isCaller && !isCallee) return;
+
+      const peerUserId = isCaller ? calleeId : callerId;
+      const peerSocketId = getReceiverSocketId(peerUserId);
+      if (peerSocketId) {
+        io.to(peerSocketId).emit("call:end", {
+          callId,
+          fromUserId: userId,
+          reason: "disconnected",
+        });
+      }
+      delete activeCalls[callId];
+     });
+
+     if (userId && userId !== "undefined") {
+      delete userSocketMap[userId];
+     }
+     io.emit("getOnlineUsers", Object.keys(userSocketMap));
+    });
+    
+})
+
+export {io,app,server}
+</file>
+
+<file path="Backend/lib/utils.js">
+import jwt from "jsonwebtoken";
+
+export const generateToken = (userId, res) => {
+  const token = jwt.sign({ userId }, process.env.JWT_SECRET, {
+    expiresIn: "7d",
+  });
+
+  res.cookie("jwt", token, {
+    maxAge: 7 * 24 * 60 * 60 * 1000, // MS
+    httpOnly: true, // prevent XSS attacks cross-site scripting attacks
+    sameSite: "strict", // CSRF attacks cross-site request forgery attacks
+    secure: process.env.NODE_ENV !== "development",
+  });
+
+  return token;
+};
+</file>
+
+<file path="Backend/middleware/auth.middleware.js">
+import jwt from "jsonwebtoken";
+import User from "../models/User.js";
+
+export const protectRoute = async (req, res, next) => {
+  try {
+    const token = req.cookies.jwt; // Cookie-parser use karna mat bhulna index.js mein
+
+    if (!token) {
+      return res.status(401).json({ message: "Unauthorized - No Token Provided" });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    if (!decoded) {
+      return res.status(401).json({ message: "Unauthorized - Invalid Token" });
+    }
+
+    const user = await User.findById(decoded.userId).select("-password");
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    req.user = user; // User details ko request object mein daal diya
+    next();
+  } catch (error) {
+    console.log("Error in protectRoute middleware: ", error.message);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+</file>
+
+<file path="Backend/models/Message.js">
+import mongoose from "mongoose";
+
+const messageSchema = new mongoose.Schema(
+  {
+    senderId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    receiverId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    text: {
+      type: String,
+    },
+    image: {
+      type: String,
+    },
+    messageType: { 
+      type: String, 
+      enum: ["text", "image", "voice_call", "video_call"], 
+      default: "text" 
+    },
+    callDuration: { type: String },
+  },
+  { timestamps: true }
+);
+
+const Message = mongoose.model("Message", messageSchema);
+
+export default Message;
+</file>
+
+<file path="Backend/models/User.js">
+import mongoose from "mongoose"
+
+const UserSchema = new mongoose.Schema({
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    fullName: {
+      type: String,
+      required: true,
+    },
+    password: {
+      type: String,
+      required: true,
+      minlength: 6,
+    },
+    profilePic: {
+      type: String,
+      default: "",
+    },
+    isVerified: { type: Boolean, default: false },
+
+    otp: { type: String },
+
+    otpExpires: { type: Date },
+    // Fields for Password Reset (Ye naye add karne hain)
+     resetPasswordOTP: { type: String },
+     resetPasswordOTPExpires: { type: Date },
+  },
+  { timestamps: true }
+);
+
+const User  = mongoose.model("User",UserSchema);
+export default User;
+</file>
+
+<file path="Backend/package.json">
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cloudinary": "^2.9.0",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.6",
+    "dotenv": "^17.2.4",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^9.2.0",
+    "nodemailer": "^8.0.1",
+    "resend": "^6.9.2",
+    "socket.io": "^4.8.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.11"
+  }
+}
+</file>
+
+<file path="Backend/routes/auth.routes.js">
+import express from "express"
+import { signup, verifyEmail ,login,checkAuth,logout,forgotPassword,resetPassword,updateProfile, verifyResetOtp} from "../controllers/auth.controller.js"
+import { protectRoute } from "../middleware/auth.middleware.js";
+const authRouter = express.Router()
+
+authRouter.post("/signup",signup);
+authRouter.post("/login", login);
+authRouter.post("/logout", logout);
+
+authRouter.post("/verify-email",verifyEmail); 
+authRouter.post("/forgot-password",forgotPassword);
+authRouter.post("/verify-reset-otp",verifyResetOtp);
+
+authRouter.post("/reset-password",resetPassword);
+
+
+authRouter.put("/update-profile",protectRoute, updateProfile)
+authRouter.get("/check", protectRoute, checkAuth);
+
+
+
+
+export default authRouter;
+</file>
+
+<file path="Backend/routes/message.routes.js">
+import express from "express";
+import { protectRoute } from "../middleware/auth.middleware.js";   
+import { getUsersForSidebar,getMessages ,sendMessage} from "../controllers/message.controller.js";     
+
+const router = express.Router();
+router.get("/users", protectRoute, getUsersForSidebar);
+
+router.get("/:id", protectRoute, getMessages);
+
+// 3. Naya message bhejne ke liye (Text ya Image)
+router.post("/send/:id", protectRoute, sendMessage); 
+
+
+
+export default router;
+</file>
+
+<file path="Backend/server.js">
+import express from "express"
+import cors from "cors"
+import authRouter from "./routes/auth.routes.js";
+import { connectDB } from "./lib/db.js";
+import dotenv from "dotenv";
+import cookieParser from "cookie-parser";
+import messageRouter from "./routes/message.routes.js";
+import { app,server,io } from "./lib/socket.js";
+dotenv.config(); // Ye line process.env ko populate karti hai
+
+import path from "path";
+
+const __dirname = path.resolve();
+
+
+
+const port = process.env.PORT;
+
+
+//middlewares
+app.use(express.json({ limit: "5mb" }));
+app.use(cookieParser());
+app.use(cors({
+    origin:"http://localhost:5173",
+    credentials:true,
+}));
+
+
+app.use("/api/auth",authRouter);
+app.use("/api/messages",messageRouter);
+
+
+
+
+
+if (process.env.NODE_ENV === "production") {
+  app.use(express.static(path.join(__dirname, "../Frontend/dist")));
+
+  app.get("*", (req, res) => {
+    res.sendFile(path.join(__dirname, "../Frontend", "dist", "index.html"));
+  });
+}
+
+server.listen(port,async ()=>{
+    console.log(`Server listening at http://localhost:${port}`)
+    await connectDB()
+});
+</file>
+
+<file path="Frontend/eslint.config.js">
+import js from '@eslint/js'
+import globals from 'globals'
+import reactHooks from 'eslint-plugin-react-hooks'
+import reactRefresh from 'eslint-plugin-react-refresh'
+import { defineConfig, globalIgnores } from 'eslint/config'
+
+export default defineConfig([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{js,jsx}'],
+    extends: [
+      js.configs.recommended,
+      reactHooks.configs.flat.recommended,
+      reactRefresh.configs.vite,
+    ],
+    languageOptions: {
+      ecmaVersion: 2020,
+      globals: globals.browser,
+      parserOptions: {
+        ecmaVersion: 'latest',
+        ecmaFeatures: { jsx: true },
+        sourceType: 'module',
+      },
+    },
+    rules: {
+      'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
+    },
+  },
+])
+</file>
+
+<file path="Frontend/index.html">
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Baat-Cheet</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
+</file>
+
+<file path="Frontend/package.json">
+{
+  "name": "frontend",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "eslint .",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@tailwindcss/vite": "^4.1.18",
+    "axios": "^1.13.5",
+    "daisyui": "^5.5.18",
+    "emoji-picker-react": "^4.18.0",
+    "framer-motion": "^12.34.0",
+    "lucide-react": "^0.564.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "react-hot-toast": "^2.6.0",
+    "react-router-dom": "^7.13.0",
+    "simple-peer": "^9.11.1",
+    "socket.io-client": "^4.8.3",
+    "tailwindcss": "^4.1.18",
+    "zustand": "^5.0.11"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.1.1",
+    "eslint": "^9.39.1",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-react-refresh": "^0.4.24",
+    "globals": "^16.5.0",
+    "vite": "^7.3.1"
+  }
+}
+</file>
+
+<file path="Frontend/public/vite.svg">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img" class="iconify iconify--logos" width="31.88" height="32" preserveAspectRatio="xMidYMid meet" viewBox="0 0 256 257"><defs><linearGradient id="IconifyId1813088fe1fbc01fb466" x1="-.828%" x2="57.636%" y1="7.652%" y2="78.411%"><stop offset="0%" stop-color="#41D1FF"></stop><stop offset="100%" stop-color="#BD34FE"></stop></linearGradient><linearGradient id="IconifyId1813088fe1fbc01fb467" x1="43.376%" x2="50.316%" y1="2.242%" y2="89.03%"><stop offset="0%" stop-color="#FFEA83"></stop><stop offset="8.333%" stop-color="#FFDD35"></stop><stop offset="100%" stop-color="#FFA800"></stop></linearGradient></defs><path fill="url(#IconifyId1813088fe1fbc01fb466)" d="M255.153 37.938L134.897 252.976c-2.483 4.44-8.862 4.466-11.382.048L.875 37.958c-2.746-4.814 1.371-10.646 6.827-9.67l120.385 21.517a6.537 6.537 0 0 0 2.322-.004l117.867-21.483c5.438-.991 9.574 4.796 6.877 9.62Z"></path><path fill="url(#IconifyId1813088fe1fbc01fb467)" d="M185.432.063L96.44 17.501a3.268 3.268 0 0 0-2.634 3.014l-5.474 92.456a3.268 3.268 0 0 0 3.997 3.378l24.777-5.718c2.318-.535 4.413 1.507 3.936 3.838l-7.361 36.047c-.495 2.426 1.782 4.5 4.151 3.78l15.304-4.649c2.372-.72 4.652 1.36 4.15 3.788l-11.698 56.621c-.732 3.542 3.979 5.473 5.943 2.437l1.313-2.028l72.516-144.72c1.215-2.423-.88-5.186-3.54-4.672l-25.505 4.922c-2.396.462-4.435-1.77-3.759-4.114l16.646-57.705c.677-2.35-1.37-4.583-3.769-4.113Z"></path></svg>
+</file>
+
+<file path="Frontend/README.md">
+# React + Vite
+
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+
+Currently, two official plugins are available:
+
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+
+## React Compiler
+
+The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+
+## Expanding the ESLint configuration
+
+If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+</file>
+
+<file path="Frontend/src/App.jsx">
+import { useEffect } from "react";
+import { Loader } from "lucide-react";
+import { Toaster } from "react-hot-toast";
+import { Routes, Route, Navigate } from "react-router-dom";
+
+import { useAuthStore } from "./store/useAuthStore";
+import { useThemeStore } from "./store/useThemeStore";
+import { useCallStore } from "./store/useCallStore";
+
+import NavBar from "./components/NavBar";
+import CallModal from "./components/CallModal";
+
+import HomePage from "./pages/HomePage";
+import SignUpPage from "./pages/SignUpPage";
+import Login from "./pages/Login";
+import VerifyEmailPage from "./pages/VerifyEmailPage";
+import ForgetPassword from "./pages/ForgetPassword";
+import ResetOtpPassword from "./pages/ResetOtpPassword";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
+import ProfilePage from "./pages/ProfilePage";
+import SettingsPage from "./pages/SettingsPage";
+
+const App = () => {
+  const { authUser, checkAuth, isCheckingAuth, socket } = useAuthStore();
+  const { theme } = useThemeStore();
+  const initializeSocketListeners = useCallStore((state) => state.initializeSocketListeners);
+  const cleanupSocketListeners = useCallStore((state) => state.cleanupSocketListeners);
+
+  useEffect(() => {
+    checkAuth();
+  }, [checkAuth]);
+
+  useEffect(() => {
+    if (!socket || !authUser) return;
+
+    initializeSocketListeners(socket);
+    return () => cleanupSocketListeners(socket);
+  }, [socket, authUser, initializeSocketListeners, cleanupSocketListeners]);
+
+  if (isCheckingAuth && !authUser) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-base-100">
+        <Loader className="size-10 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  return (
+    <div data-theme={theme}>
+      <NavBar />
+
+      <Routes>
+        <Route path="/" element={authUser ? <HomePage /> : <Navigate to="/login" />} />
+        <Route path="/signup" element={!authUser ? <SignUpPage /> : <Navigate to="/" />} />
+        <Route path="/login" element={!authUser ? <Login /> : <Navigate to="/" />} />
+        <Route path="/verify-email" element={!authUser ? <VerifyEmailPage /> : <Navigate to="/" />} />
+        <Route path="/forget-password" element={!authUser ? <ForgetPassword /> : <Navigate to="/" />} />
+        <Route path="/reset-otp" element={!authUser ? <ResetOtpPassword /> : <Navigate to="/" />} />
+        <Route path="/reset-password" element={!authUser ? <ResetPasswordPage /> : <Navigate to="/" />} />
+        <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/settings" element={<SettingsPage />} />
+        <Route path="*" element={<Navigate to="/" />} />
+      </Routes>
+
+      {authUser && <CallModal />}
+      <Toaster position="top-center" reverseOrder={false} />
+    </div>
+  );
+};
+
+export default App;
+</file>
+
+<file path="Frontend/src/assets/react.svg">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img" class="iconify iconify--logos" width="35.93" height="32" preserveAspectRatio="xMidYMid meet" viewBox="0 0 256 228"><path fill="#00D8FF" d="M210.483 73.824a171.49 171.49 0 0 0-8.24-2.597c.465-1.9.893-3.777 1.273-5.621c6.238-30.281 2.16-54.676-11.769-62.708c-13.355-7.7-35.196.329-57.254 19.526a171.23 171.23 0 0 0-6.375 5.848a155.866 155.866 0 0 0-4.241-3.917C100.759 3.829 77.587-4.822 63.673 3.233C50.33 10.957 46.379 33.89 51.995 62.588a170.974 170.974 0 0 0 1.892 8.48c-3.28.932-6.445 1.924-9.474 2.98C17.309 83.498 0 98.307 0 113.668c0 15.865 18.582 31.778 46.812 41.427a145.52 145.52 0 0 0 6.921 2.165a167.467 167.467 0 0 0-2.01 9.138c-5.354 28.2-1.173 50.591 12.134 58.266c13.744 7.926 36.812-.22 59.273-19.855a145.567 145.567 0 0 0 5.342-4.923a168.064 168.064 0 0 0 6.92 6.314c21.758 18.722 43.246 26.282 56.54 18.586c13.731-7.949 18.194-32.003 12.4-61.268a145.016 145.016 0 0 0-1.535-6.842c1.62-.48 3.21-.974 4.76-1.488c29.348-9.723 48.443-25.443 48.443-41.52c0-15.417-17.868-30.326-45.517-39.844Zm-6.365 70.984c-1.4.463-2.836.91-4.3 1.345c-3.24-10.257-7.612-21.163-12.963-32.432c5.106-11 9.31-21.767 12.459-31.957c2.619.758 5.16 1.557 7.61 2.4c23.69 8.156 38.14 20.213 38.14 29.504c0 9.896-15.606 22.743-40.946 31.14Zm-10.514 20.834c2.562 12.94 2.927 24.64 1.23 33.787c-1.524 8.219-4.59 13.698-8.382 15.893c-8.067 4.67-25.32-1.4-43.927-17.412a156.726 156.726 0 0 1-6.437-5.87c7.214-7.889 14.423-17.06 21.459-27.246c12.376-1.098 24.068-2.894 34.671-5.345a134.17 134.17 0 0 1 1.386 6.193ZM87.276 214.515c-7.882 2.783-14.16 2.863-17.955.675c-8.075-4.657-11.432-22.636-6.853-46.752a156.923 156.923 0 0 1 1.869-8.499c10.486 2.32 22.093 3.988 34.498 4.994c7.084 9.967 14.501 19.128 21.976 27.15a134.668 134.668 0 0 1-4.877 4.492c-9.933 8.682-19.886 14.842-28.658 17.94ZM50.35 144.747c-12.483-4.267-22.792-9.812-29.858-15.863c-6.35-5.437-9.555-10.836-9.555-15.216c0-9.322 13.897-21.212 37.076-29.293c2.813-.98 5.757-1.905 8.812-2.773c3.204 10.42 7.406 21.315 12.477 32.332c-5.137 11.18-9.399 22.249-12.634 32.792a134.718 134.718 0 0 1-6.318-1.979Zm12.378-84.26c-4.811-24.587-1.616-43.134 6.425-47.789c8.564-4.958 27.502 2.111 47.463 19.835a144.318 144.318 0 0 1 3.841 3.545c-7.438 7.987-14.787 17.08-21.808 26.988c-12.04 1.116-23.565 2.908-34.161 5.309a160.342 160.342 0 0 1-1.76-7.887Zm110.427 27.268a347.8 347.8 0 0 0-7.785-12.803c8.168 1.033 15.994 2.404 23.343 4.08c-2.206 7.072-4.956 14.465-8.193 22.045a381.151 381.151 0 0 0-7.365-13.322Zm-45.032-43.861c5.044 5.465 10.096 11.566 15.065 18.186a322.04 322.04 0 0 0-30.257-.006c4.974-6.559 10.069-12.652 15.192-18.18ZM82.802 87.83a323.167 323.167 0 0 0-7.227 13.238c-3.184-7.553-5.909-14.98-8.134-22.152c7.304-1.634 15.093-2.97 23.209-3.984a321.524 321.524 0 0 0-7.848 12.897Zm8.081 65.352c-8.385-.936-16.291-2.203-23.593-3.793c2.26-7.3 5.045-14.885 8.298-22.6a321.187 321.187 0 0 0 7.257 13.246c2.594 4.48 5.28 8.868 8.038 13.147Zm37.542 31.03c-5.184-5.592-10.354-11.779-15.403-18.433c4.902.192 9.899.29 14.978.29c5.218 0 10.376-.117 15.453-.343c-4.985 6.774-10.018 12.97-15.028 18.486Zm52.198-57.817c3.422 7.8 6.306 15.345 8.596 22.52c-7.422 1.694-15.436 3.058-23.88 4.071a382.417 382.417 0 0 0 7.859-13.026a347.403 347.403 0 0 0 7.425-13.565Zm-16.898 8.101a358.557 358.557 0 0 1-12.281 19.815a329.4 329.4 0 0 1-23.444.823c-7.967 0-15.716-.248-23.178-.732a310.202 310.202 0 0 1-12.513-19.846h.001a307.41 307.41 0 0 1-10.923-20.627a310.278 310.278 0 0 1 10.89-20.637l-.001.001a307.318 307.318 0 0 1 12.413-19.761c7.613-.576 15.42-.876 23.31-.876H128c7.926 0 15.743.303 23.354.883a329.357 329.357 0 0 1 12.335 19.695a358.489 358.489 0 0 1 11.036 20.54a329.472 329.472 0 0 1-11 20.722Zm22.56-122.124c8.572 4.944 11.906 24.881 6.52 51.026c-.344 1.668-.73 3.367-1.15 5.09c-10.622-2.452-22.155-4.275-34.23-5.408c-7.034-10.017-14.323-19.124-21.64-27.008a160.789 160.789 0 0 1 5.888-5.4c18.9-16.447 36.564-22.941 44.612-18.3ZM128 90.808c12.625 0 22.86 10.235 22.86 22.86s-10.235 22.86-22.86 22.86s-22.86-10.235-22.86-22.86s10.235-22.86 22.86-22.86Z"></path></svg>
+</file>
+
+<file path="Frontend/src/components/AuthImagePattern.jsx">
+import { motion } from "framer-motion";
+
+const AuthImagePattern = ({ title, subtitle }) => {
+  return (
+    <div className="hidden lg:flex relative items-center justify-center overflow-hidden bg-linear-to-br from-base-200 via-base-100 to-base-200 p-12">
+
+      {/* floating gradient blobs */}
+      <div className="absolute w-72 h-72 bg-primary/20 rounded-full blur-3xl top-10 left-10" />
+      <div className="absolute w-72 h-72 bg-secondary/20 rounded-full blur-3xl bottom-10 right-10" />
+
+      <div className="relative max-w-md text-center backdrop-blur-xl bg-base-100/60 border border-base-content/10 rounded-3xl p-10 shadow-2xl">
+        
+        {/* animated grid */}
+        <div className="grid grid-cols-3 gap-3 mb-8">
+          {[...Array(9)].map((_, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0.4, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{
+                duration: 0.6,
+                delay: i * 0.05,
+                repeat: Infinity,
+                repeatType: "mirror",
+                repeatDelay: 1.5,
+              }}
+              className="aspect-square rounded-2xl bg-primary/20"
+            />
+          ))}
+        </div>
+
+        <h2 className="text-3xl font-bold mb-3">{title}</h2>
+        <p className="text-base-content/60 leading-relaxed">{subtitle}</p>
+      </div>
+    </div>
+  );
+};
+
+export default AuthImagePattern;
+</file>
+
+<file path="Frontend/src/components/ChatContainer.jsx">
+import { useChatStore } from "../store/useChatStore";
+import { useEffect, useRef } from "react";
+
+import ChatHeader from "./ChatHeader";
+import MessageInput from "./MessageInput";
+import MessageSkeleton from "./skeleton/MessageSkeleton";
+import { useAuthStore } from "../store/useAuthStore";
+import { formatMessageTime } from "../lib/utils";
+import { motion } from "framer-motion";
+
+const ChatContainer = () => {
+  const {
+    messages,
+    getMessages,
+    isMessagesLoading,
+    selectedUser,
+    subscribeToMessages,
+    unsubscribeFromMessages,
+  } = useChatStore();
+  const { authUser } = useAuthStore();
+  const messageEndRef = useRef(null);
+
+  useEffect(() => {
+    getMessages(selectedUser._id);
+    subscribeToMessages();
+    return () => unsubscribeFromMessages();
+  }, [selectedUser._id, getMessages, subscribeToMessages, unsubscribeFromMessages]);
+
+  // Scroll to bottom logic fix: Sirf messages change hone par bottom par jao
+  useEffect(() => {
+    if (messageEndRef.current && messages) {
+      messageEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages]);
+
+  if (isMessagesLoading) {
+    return (
+      <div className="flex-1 flex flex-col overflow-auto bg-base-100">
+        <ChatHeader />
+        <MessageSkeleton />
+        <MessageInput />
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex-1 flex flex-col overflow-hidden bg-base-100">
+      <ChatHeader />
+
+      {/* 💬 Messages Area */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
+        {messages.map((message) => {
+          const isMe = message.senderId === authUser._id;
+          
+          return (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              key={message._id}
+              className={`chat ${isMe ? "chat-end" : "chat-start"}`}
+            >
+              {/* Avatar */}
+              <div className="chat-image avatar">
+                <div className="size-10 rounded-full border border-base-300 shadow-sm">
+                  <img
+                    src={
+                      isMe
+                        ? authUser.profilePic || `https://api.dicebear.com/7.x/avataaars/svg?seed=${authUser.fullName}`
+                        : selectedUser.profilePic || `https://api.dicebear.com/7.x/avataaars/svg?seed=${selectedUser.fullName}`
+                    }
+                    alt="profile pic"
+                  />
+                </div>
+              </div>
+
+              {/* Timestamp */}
+              <div className="chat-header mb-1">
+                <time className="text-[10px] opacity-50 ml-1 font-medium">
+                  {formatMessageTime(message.createdAt)}
+                </time>
+              </div>
+
+              {/* Message Bubble */}
+              <div 
+                className={`chat-bubble flex flex-col gap-2 shadow-sm max-w-[85%] sm:max-w-[70%] 
+                  ${isMe ? "bg-primary text-primary-content" : "bg-base-200 text-base-content"}`}
+              >
+                {message.image && (
+                  <div className="relative group">
+                    <img
+                      src={message.image}
+                      alt="Attachment"
+                      className="rounded-lg max-h-60 w-full object-cover cursor-pointer hover:opacity-95 transition-opacity"
+                    />
+                  </div>
+                )}
+                {message.text && <p className="text-sm sm:text-base leading-relaxed">{message.text}</p>}
+              </div>
+            </motion.div>
+          );
+        })}
+        {/* Scroll Anchor: Isse hamesha niche scroll hoga */}
+        <div ref={messageEndRef} />
+      </div>
+
+      <MessageInput />
+    </div>
+  );
+};
+
+export default ChatContainer;
+</file>
+
+<file path="Frontend/src/components/ChatHeader.jsx">
+import { X, Phone, Video } from "lucide-react";
+import { useAuthStore } from "../store/useAuthStore";
+import { useChatStore } from "../store/useChatStore";
+import { useCallStore } from "../store/useCallStore";
+
+const ChatHeader = () => {
+  const { selectedUser, setSelectedUser } = useChatStore();
+  const { onlineUsers } = useAuthStore();
+  const { startCall, currentCall, incomingCall } = useCallStore();
+
+  const isOnline = onlineUsers.includes(selectedUser._id);
+  const isCallBusy = Boolean(currentCall || incomingCall);
+
+  return (
+    <div className="p-3 border-b border-base-300 bg-base-100/50 backdrop-blur-md">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="relative">
+            <div className="size-10 rounded-full overflow-hidden border border-base-300 shadow-sm">
+              <img
+                src={selectedUser.profilePic || `https://api.dicebear.com/7.x/avataaars/svg?seed=${selectedUser.fullName}`}
+                alt={selectedUser.fullName}
+                className="object-cover size-full"
+              />
+            </div>
+            {isOnline && (
+              <span className="absolute bottom-0 right-0 size-3 bg-success rounded-full ring-2 ring-base-100 animate-pulse" />
+            )}
+          </div>
+
+          <div className="text-left">
+            <h3 className="font-bold text-base tracking-tight">{selectedUser.fullName}</h3>
+            <div className="flex items-center gap-1.5">
+              {isOnline ? (
+                <span className="text-[11px] text-success font-semibold flex items-center gap-1">
+                  <span className="size-1.5 bg-success rounded-full" /> Online
+                </span>
+              ) : (
+                <span className="text-[11px] text-base-content/40 font-medium">Offline</span>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <button
+            title={isOnline ? "Start voice call" : "User offline"}
+            onClick={() => startCall(selectedUser._id, "voice")}
+            disabled={!isOnline || isCallBusy}
+            className="btn btn-sm btn-circle btn-ghost hover:bg-base-300 transition-colors disabled:opacity-40"
+          >
+            <Phone className="size-4 text-base-content/70" />
+          </button>
+
+          <button
+            title={isOnline ? "Start video call" : "User offline"}
+            onClick={() => startCall(selectedUser._id, "video")}
+            disabled={!isOnline || isCallBusy}
+            className="btn btn-sm btn-circle btn-ghost hover:bg-base-300 transition-colors disabled:opacity-40"
+          >
+            <Video className="size-4 text-base-content/70" />
+          </button>
+
+          <button
+            onClick={() => setSelectedUser(null)}
+            className="btn btn-sm btn-circle btn-ghost hover:bg-base-300 transition-colors"
+          >
+            <X className="size-5 text-base-content/70" />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default ChatHeader;
+</file>
+
+<file path="Frontend/src/components/MessageInput.jsx">
+import { useRef, useState } from "react";
+import { useChatStore } from "../store/useChatStore";
+import { Image, Send, X, Smile } from "lucide-react";
+import toast from "react-hot-toast";
+import { motion, AnimatePresence } from "framer-motion";
+import EmojiPicker from "emoji-picker-react";
+
+const MessageInput = () => {
+  const [text, setText] = useState("");
+  const [imagePreview, setImagePreview] = useState(null);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const fileInputRef = useRef(null);
+  const emojiPickerRef = useRef(null);
+  const { sendMessage } = useChatStore();
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select an image file");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImagePreview(reader.result);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const removeImage = () => {
+    setImagePreview(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const handleEmojiClick = (emojiObject) => {
+    setText(text + emojiObject.emoji);
+    setShowEmojiPicker(false);
+  };
+
+  const handleSendMessage = async (e) => {
+    e.preventDefault();
+    if (!text.trim() && !imagePreview) return;
+
+    try {
+      await sendMessage({
+        text: text.trim(),
+        image: imagePreview,
+      });
+
+      // Clear form
+      setText("");
+      setImagePreview(null);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    } catch (error) {
+      console.error("Failed to send message:", error);
+    }
+  };
+
+  return (
+    <div className="p-4 w-full bg-base-100/50 backdrop-blur-lg border-t border-base-300">
+      <AnimatePresence>
+        {imagePreview && (
+          <motion.div 
+            initial={{ opacity: 0, y: 20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="mb-3 flex items-center gap-2"
+          >
+            <div className="relative group">
+              <img
+                src={imagePreview}
+                alt="Preview"
+                className="size-20 object-cover rounded-2xl border-2 border-primary/20 shadow-lg"
+              />
+              <button
+                onClick={removeImage}
+                className="absolute -top-2 -right-2 size-6 rounded-full bg-error text-error-content
+                flex items-center justify-center shadow-md hover:scale-110 transition-transform"
+                type="button"
+              >
+                <X className="size-4" />
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Emoji Picker */}
+      <AnimatePresence>
+        {showEmojiPicker && (
+          <motion.div
+            ref={emojiPickerRef}
+            initial={{ opacity: 0, y: 10, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="mb-3 absolute bottom-20 left-4 z-50"
+          >
+            <EmojiPicker
+              onEmojiClick={handleEmojiClick}
+              theme="dark"
+              width={300}
+              height={400}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <form onSubmit={handleSendMessage} className="flex items-end gap-2">
+        <div className="flex-1 flex items-center gap-2 bg-base-200 rounded-2xl px-3 py-2 focus-within:ring-2 focus-within:ring-primary/20 transition-all">
+          
+          {/* Image Picker Button */}
+          <button
+            type="button"
+            className={`btn btn-ghost btn-circle btn-sm
+                     ${imagePreview ? "text-primary" : "text-base-content/40"}`}
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <Image size={20} />
+          </button>
+
+          <input
+            type="file"
+            accept="image/*"
+            className="hidden"
+            ref={fileInputRef}
+            onChange={handleImageChange}
+          />
+
+          {/* Text Input */}
+          <input
+            type="text"
+            className="flex-1 bg-transparent border-none outline-none text-sm sm:text-base py-1 px-1 placeholder:text-base-content/30"
+            placeholder="Kuch likho bhai..."
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+          />
+
+          {/* Emoji Button */}
+          <button 
+            type="button" 
+            onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+            className="hidden sm:flex btn btn-ghost btn-circle btn-sm text-base-content/40 hover:text-primary transition-colors"
+          >
+            <Smile size={20} />
+          </button>
+        </div>
+
+        {/* Send Button */}
+        <motion.button
+          whileTap={{ scale: 0.9 }}
+          type="submit"
+          className={`btn btn-circle shadow-lg transition-all
+            ${(text.trim() || imagePreview) 
+              ? "btn-primary shadow-primary/20" 
+              : "btn-ghost bg-base-200 text-base-content/20 cursor-not-allowed"}`}
+          disabled={!text.trim() && !imagePreview}
+        >
+          <Send size={20} className={text.trim() || imagePreview ? "translate-x-0.5" : ""} />
+        </motion.button>
+      </form>
+    </div>
+  );
+};
+
+export default MessageInput;
+</file>
+
+<file path="Frontend/src/components/NavBar.jsx">
+import { Link, useLocation } from "react-router-dom";
+import { useAuthStore } from "../store/useAuthStore";
+import { LogOut, MessageSquare, Settings, User } from "lucide-react";
+
+const Navbar = () => {
+  const { logout, authUser } = useAuthStore();
+  const location = useLocation();
+
+  const isActive = (path) => location.pathname === path;
+
+  return (
+    <header
+      className="bg-base-100 border-b border-base-300 fixed w-full top-0 z-40 shadow-sm"
+    >
+      <div className="container mx-auto px-4 h-16">
+        <div className="flex items-center justify-between h-full">
+          
+          {/* LEFT: LOGO SECTION */}
+          <div className="flex items-center gap-8">
+            <Link to="/" className="flex items-center gap-2.5 transition-all active:scale-95 group">
+              <div className="size-10 rounded-xl bg-primary flex items-center justify-center shadow-md group-hover:rotate-6 transition-transform">
+                <MessageSquare className="w-6 h-6 text-primary-content" />
+              </div>
+              <span className="text-xl font-extrabold tracking-tight text-base-content uppercase">
+                Baat-<span className="text-primary">Cheet</span>
+              </span>
+            </Link>
+          </div>
+
+          {/* RIGHT: ACTIONS SECTION */}
+          <div className="flex items-center gap-2">
+            
+            {/* Settings Button */}
+            <Link
+              to={"/settings"}
+              className={`
+                btn btn-ghost btn-sm gap-2 font-semibold
+                ${isActive("/settings") ? "bg-primary/10 text-primary" : "text-base-content/70"}
+              `}
+            >
+              <Settings className="w-4 h-4" />
+              <span className="hidden sm:inline">Settings</span>
+            </Link>
+
+            {authUser && (
+              <>
+                {/* Profile Button */}
+                <Link 
+                  to={"/profile"} 
+                  className={`
+                    btn btn-ghost btn-sm gap-2 font-semibold
+                    ${isActive("/profile") ? "bg-primary/10 text-primary" : "text-base-content/70"}
+                  `}
+                >
+                  <User className="w-4 h-4" />
+                  <span className="hidden sm:inline">Profile</span>
+                </Link>
+
+                {/* Vertical Divider */}
+                <div className="w-[1px] h-6 bg-base-300 mx-1 hidden sm:block" />
+
+                {/* Logout Button */}
+                <button 
+                  className="btn btn-sm btn-ghost text-error hover:bg-error/10 gap-2 font-bold" 
+                  onClick={logout}
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span className="hidden sm:inline">Logout</span>
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    </header>
+  );
+};
+
+export default Navbar;
+</file>
+
+<file path="Frontend/src/components/NoChatSelected.jsx">
+import { MessageSquare } from "lucide-react";
+import { motion } from "framer-motion";
+
+const NoChatSelected = () => {
+  return (
+    <div className="w-full flex flex-1 flex-col items-center justify-center p-16 bg-base-100/50">
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="max-w-md text-center space-y-6"
+      >
+        {/* ✨ Icon Display with Glow Effect */}
+        <div className="flex justify-center gap-4 mb-4">
+          <div className="relative">
+            <motion.div
+              animate={{ 
+                scale: [1, 1.1, 1],
+                rotate: [0, 5, -5, 0] 
+              }}
+              transition={{ 
+                duration: 4, 
+                repeat: Infinity, 
+                ease: "easeInOut" 
+              }}
+              className="w-20 h-20 rounded-3xl bg-primary/10 flex items-center justify-center relative z-10"
+            >
+              <MessageSquare className="w-10 h-10 text-primary " />
+            </motion.div>
+            
+            {/* Background Glow */}
+            <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full -z-10 animate-pulse" />
+          </div>
+        </div>
+
+        {/* 📝 Welcome Text */}
+        <div className="space-y-2">
+          <h2 className="text-3xl font-extrabold tracking-tight">
+            Welcome to <span className="text-primary">Baat-Cheet!</span>
+          </h2>
+          <p className="text-base-content/60 text-lg">
+            Bhai, sidebar se koi conversation select kar aur gupshup shuru kar! 🚀
+          </p>
+        </div>
+
+        {/* 💡 Feature Tip (Optional but cool) */}
+        <div className="pt-8 border-t border-base-content/5">
+          <p className="text-xs uppercase tracking-widest text-base-content/40 font-bold">
+            Real-time • Secure • Fast
+          </p>
+        </div>
+      </motion.div>
+    </div>
+  );
+};
+
+export default NoChatSelected;
+</file>
+
+<file path="Frontend/src/components/Sidebar.jsx">
+import { useEffect, useState } from "react";
+import { useChatStore } from "../store/useChatStore";
+import { useAuthStore } from "../store/useAuthStore";
+import SidebarSkeleton from "./skeleton/SideBarSkeleton";
+import { Users, Search } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+
+const Sidebar = () => {
+  const { getUsers, users, selectedUser, setSelectedUser, isUsersLoading } = useChatStore();
+  const {onlineUsers} = useAuthStore();
+  const [showOnlineOnly, setShowOnlineOnly] = useState(false);
+
+  useEffect(() => {
+    getUsers();
+  }, [getUsers]);
+
+  const filteredUsers = showOnlineOnly
+    ? users.filter((user) => onlineUsers.includes(user._id))
+    : users;
+
+  if (isUsersLoading) return <SidebarSkeleton />;
+
+  return (
+    <aside className="h-full w-20 lg:w-80 border-r border-base-300 flex flex-col transition-all duration-300 bg-base-100">
+      {/* 🛠️ Header Section */}
+      <div className="border-b border-base-300 w-full p-5 space-y-4">
+        <div className="flex items-center gap-3 text-primary">
+          <div className="p-2 bg-primary/10 rounded-lg">
+            <Users className="size-6" />
+          </div>
+          <span className="font-bold text-xl tracking-tight hidden lg:block text-base-content">
+            Contacts
+          </span>
+        </div>
+
+        {/* 🔍 Filter & Search Area */}
+        <div className="hidden lg:flex flex-col gap-3">
+          <div className="flex items-center justify-between">
+            <label className="cursor-pointer flex items-center gap-3 group">
+              <input
+                type="checkbox"
+                checked={showOnlineOnly}
+                onChange={(e) => setShowOnlineOnly(e.target.checked)}
+                className="checkbox checkbox-primary checkbox-sm transition-all"
+              />
+              <span className="text-sm font-medium text-base-content/70 group-hover:text-base-content transition-colors">
+                Online Only
+              </span>
+            </label>
+            <span className="text-[10px] font-bold px-2 py-1 bg-base-200 rounded-full text-zinc-500 uppercase tracking-wider">
+              {Math.max(0, onlineUsers.length - 1)} Live
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* 👥 Users List Container */}
+      <div className="overflow-y-auto w-full py-2 custom-scrollbar">
+        <AnimatePresence mode="popLayout">
+          {filteredUsers.map((user) => (
+            <motion.button
+              layout
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              key={user._id}
+              onClick={() => setSelectedUser(user)}
+              className={`
+                w-full p-4 flex items-center gap-4
+                transition-all duration-200 relative group
+                ${selectedUser?._id === user._id 
+                  ? "bg-primary/10 border-r-4 border-primary shadow-sm" 
+                  : "hover:bg-base-200/50"}
+              `}
+            >
+              {/* Avatar Section */}
+              <div className="relative mx-auto lg:mx-0">
+                <img
+                  src={user.profilePic || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.fullName}`}
+                  alt={user.fullName}
+                  className={`size-12 object-cover rounded-2xl transition-all duration-300
+                    ${selectedUser?._id === user._id ? "scale-110 shadow-md" : "group-hover:scale-105"}
+                  `}
+                />
+                
+                {onlineUsers.includes(user._id) && (
+                  <span className="absolute -bottom-0.5 -right-0.5 size-3.5 bg-green-500 rounded-full ring-4 ring-base-100 animate-pulse shadow-sm" />
+                )}
+              </div>
+
+              {/* User info - Desktop Only */}
+              <div className="hidden lg:block text-left min-w-0 flex-1">
+                <div className="font-bold truncate text-base-content/90">
+                  {user.fullName}
+                </div>
+                <div className="text-xs font-medium flex items-center gap-1.5 mt-0.5">
+                  {onlineUsers.includes(user._id) ? (
+                    <span className="text-success flex items-center gap-1">
+                      <span className="size-1.5 bg-success rounded-full" /> Online
+                    </span>
+                  ) : (
+                    <span className="text-base-content/40">Offline</span>
+                  )}
+                </div>
+              </div>
+            </motion.button>
+          ))}
+        </AnimatePresence>
+
+        {filteredUsers.length === 0 && (
+          <motion.div 
+            initial={{ opacity: 0 }} 
+            animate={{ opacity: 1 }} 
+            className="text-center text-base-content/40 py-10 flex flex-col items-center gap-2"
+          >
+            <div className="size-12 bg-base-200 rounded-full flex items-center justify-center opacity-50">
+              <Users className="size-6" />
+            </div>
+            <p className="text-sm font-medium">No one's here yet</p>
+          </motion.div>
+        )}
+      </div>
+    </aside>
+  );
+};
+
+export default Sidebar;
+</file>
+
+<file path="Frontend/src/components/skeleton/MessageSkeleton.jsx">
+import { motion } from "framer-motion";
+
+const MessageSkeleton = () => {
+  // 6 dummy messages loading state ke liye
+  const skeletonMessages = Array(6).fill(null);
+
+  return (
+    <div className="flex-1 overflow-y-auto p-4 space-y-6 custom-scrollbar bg-base-100/50">
+      {skeletonMessages.map((_, idx) => {
+        const isAlignEnd = idx % 2 !== 0; // Alternating start and end
+
+        return (
+          <motion.div
+            key={idx}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: idx * 0.1 }}
+            className={`chat ${isAlignEnd ? "chat-end" : "chat-start"}`}
+          >
+            {/* 👤 Avatar Skeleton */}
+            <div className="chat-image avatar">
+              <div className="size-10 rounded-full">
+                <div className="skeleton w-full h-full rounded-full" />
+              </div>
+            </div>
+
+            {/* 🕒 Time/Header Skeleton */}
+            <div className="chat-header mb-1">
+              <div className="skeleton h-3 w-12 opacity-50" />
+            </div>
+
+            {/* 💬 Bubble Skeleton */}
+            <div className="chat-bubble bg-transparent p-0 shadow-none">
+              <div 
+                className={`skeleton h-12 rounded-2xl 
+                  ${isAlignEnd ? "rounded-tr-none" : "rounded-tl-none"}
+                `}
+                style={{ 
+                  // Varying widths for a realistic chat look
+                  width: idx % 3 === 0 ? "250px" : idx % 3 === 1 ? "180px" : "120px" 
+                }}
+              />
+            </div>
+          </motion.div>
+        );
+      })}
+    </div>
+  );
+};
+
+export default MessageSkeleton;
+</file>
+
+<file path="Frontend/src/components/skeleton/SideBarSkeleton.jsx">
+import { Users } from "lucide-react";
+import { motion } from "framer-motion";
+
+const SidebarSkeleton = () => {
+  // 8 items loading state dikhane ke liye
+  const skeletonContacts = Array(8).fill(null);
+
+  return (
+    <aside className="h-full w-20 lg:w-80 border-r border-base-300 flex flex-col transition-all duration-200 bg-base-100">
+      
+      {/* 🛠️ Header Skeleton */}
+      <div className="border-b border-base-300 w-full p-5 space-y-4">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-base-200 rounded-lg">
+            <Users className="size-6 text-base-content/20" />
+          </div>
+          <div className="skeleton h-6 w-24 hidden lg:block" />
+        </div>
+
+        {/* Filter Area Skeleton */}
+        <div className="hidden lg:flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="skeleton size-4 rounded" />
+            <div className="skeleton h-3 w-20" />
+          </div>
+          <div className="skeleton h-4 w-12 rounded-full" />
+        </div>
+      </div>
+
+      {/* 👥 Skeleton Contacts List */}
+      <div className="overflow-y-auto w-full py-2">
+        {skeletonContacts.map((_, idx) => (
+          <motion.div 
+            key={idx}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: idx * 0.05 }} // Ek-ek karke appear honge
+            className="w-full p-4 flex items-center gap-4"
+          >
+            {/* Avatar skeleton - Sidebar se matched rounded-2xl */}
+            <div className="relative mx-auto lg:mx-0">
+              <div className="skeleton size-12 rounded-2xl" />
+            </div>
+
+            {/* User info skeleton - Desktop only */}
+            <div className="hidden lg:block text-left min-w-0 flex-1">
+              <div className="skeleton h-4 w-32 mb-2.5" />
+              <div className="skeleton h-3 w-16" />
+            </div>
+          </motion.div>
+        ))}
+      </div>
+    </aside>
+  );
+};
+
+export default SidebarSkeleton;
+</file>
+
+<file path="Frontend/src/index.css">
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap');
+@import "tailwindcss";
+@plugin "daisyui" {
+  themes: all;
+}
+
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: hsl(var(--bc) / 0.1);
+  border-radius: 10px;
+}
+</file>
+
+<file path="Frontend/src/lib/axios.js">
+import axios from "axios"
+
+export const axiosInstance = axios.create({
+    baseURL: import.meta.env.MODE === "development" ? "http://localhost:5000/api" : "/api",
+    withCredentials:true,
+});
+</file>
+
+<file path="Frontend/src/lib/utils.js">
+export function formatMessageTime(date) {
+  return new Date(date).toLocaleTimeString("en-US", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
+}
+</file>
+
+<file path="Frontend/src/main.jsx">
+window.global = window; // 🚩 Add this line at the very top
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import './index.css'
+import App from './App.jsx'
+import { BrowserRouter } from "react-router-dom";
+
+createRoot(document.getElementById('root')).render(
+  <StrictMode>
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
+  </StrictMode>
+)
+</file>
+
+<file path="Frontend/src/pages/ForgetPassword.jsx">
+import { useState } from "react";
+import { useAuthStore } from "../store/useAuthStore";
+import { Mail, ArrowLeft, Loader2 } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+
+const ForgetPassword = () => {
+  const [email, setEmail] = useState("");
+  const { forgotPassword, isSendingResetOtp } = useAuthStore();
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await forgotPassword( email );
+      // Email ko state mein bhej rahe hain taaki OTP page ko pata ho kahan verify karna hai
+      navigate("/reset-otp", { state: { email } });
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  return (
+    <div className="h-screen flex items-center justify-center bg-base-200 p-4">
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="max-w-md w-full bg-base-100 p-8 rounded-2xl shadow-xl border border-white/5"
+      >
+        <div className="text-center mb-8">
+          <div className="size-12 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
+            <Mail className="size-6 text-primary" />
+          </div>
+          <h1 className="text-2xl font-bold">Forgot Password?</h1>
+          <p className="text-base-content/60">Enter your email to receive a reset code</p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="form-control">
+            <div className="relative">
+              <Mail className="absolute left-3 top-3 size-5 text-base-content/40" />
+              <input
+                type="email"
+                className="input input-bordered w-full pl-10 focus:input-primary transition-all"
+                placeholder="nirmal@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+          </div>
+
+          <button className="btn btn-primary w-full" disabled={isSendingResetOtp}>
+            {isSendingResetOtp ? <Loader2 className="animate-spin" /> : "Get OTP"}
+          </button>
+        </form>
+
+        <div className="mt-8 text-center">
+          <Link to="/login" className="text-sm link link-primary inline-flex items-center gap-2">
+            <ArrowLeft className="size-4" /> Back to Login
+          </Link>
+        </div>
+      </motion.div>
+    </div>
+  );
+};
+
+export default ForgetPassword;
+</file>
+
+<file path="Frontend/src/pages/HomePage.jsx">
+import { useChatStore } from "../store/useChatStore";
+import Sidebar from "../components/Sidebar";
+import NoChatSelected from "../components/NoChatSelected";
+import ChatContainer from "../components/ChatContainer";
+import { motion } from "framer-motion";
+
+const HomePage = () => {
+  const { selectedUser } = useChatStore();
+
+  return (
+    <div className="min-h-screen bg-base-200 flex items-center justify-center p-4 pt-20">
+      {/* 🚀 Main Outer Container */}
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.98 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.4 }}
+        className="bg-base-100 rounded-3xl shadow-2xl w-full max-w-7xl h-[calc(100vh-120px)] border border-base-content/5 overflow-hidden"
+      >
+        <div className="flex h-full">
+          
+          {/* 📱 LEFT: SIDEBAR (Users List) */}
+          <aside className={`
+            h-full border-r border-base-content/5 transition-all duration-300
+            ${selectedUser ? "hidden md:flex w-80 lg:w-96" : "flex w-full md:w-80 lg:w-96"}
+          `}>
+            <Sidebar />
+          </aside>
+
+          {/* 💬 RIGHT: CHAT AREA */}
+          <main className={`
+            flex-1 flex flex-col h-full overflow-hidden transition-all duration-300
+            ${!selectedUser ? "hidden md:flex" : "flex"}
+          `}>
+            {!selectedUser ? (
+              <NoChatSelected />
+            ) : (
+              <motion.div 
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="h-full flex flex-col"
+              >
+                <ChatContainer />
+              </motion.div>
+            )}
+          </main>
+
+        </div>
+      </motion.div>
+    </div>
+  );
+};
+
+export default HomePage;
+</file>
+
+<file path="Frontend/src/pages/Login.jsx">
+import { useState } from "react";
+import { useAuthStore } from "../store/useAuthStore";
+import { Link } from "react-router-dom";
+import { Mail, Lock, Eye, EyeOff, Loader2, MessageSquare } from "lucide-react";
+import { motion } from "framer-motion";
+import AuthImagePattern from "../components/AuthImagePattern";
+
+const Login = () => {
+  const [showPassword, setShowPassword] = useState(false);
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
+
+  const { login, isLoggingIn } = useAuthStore();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+  try {
+    await login(formData);
+    // Success hone par navigate ki zaroorat nahi, App.jsx handle kar lega
+  } catch (error) {
+    // 🚩 Agar user verified nahi hai, toh usey OTP page par bhejo
+    if (error.response?.data?.notVerified) {
+      navigate("/verify-email", { state: { email: formData.email } });
+    }
+  }
+  };
+
+  return (
+    <div className="h-screen grid lg:grid-cols-2 bg-base-200">
+      {/* Left Side - Form Area */}
+      <div className="flex flex-col justify-center items-center p-6 sm:p-12">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="w-full max-w-md space-y-8 bg-base-100 p-8 rounded-2xl shadow-xl border border-white/5"
+        >
+          {/* Logo & Header */}
+          <div className="text-center mb-8">
+            <div className="flex flex-col items-center gap-2 group">
+              <div className="size-12 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                <MessageSquare className="size-6 text-primary" />
+              </div>
+              <h1 className="text-2xl font-bold mt-2">Welcome Back</h1>
+              <p className="text-base-content/60">Sign in to your account</p>
+            </div>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Email Input */}
+            <div className="relative">
+                <Mail className="absolute left-2 top-2 size-6 z-10 text-base-content/40" />
+                <input
+                  type="email"
+                  placeholder="Email address"
+                  className="input input-bordered w-full pl-10 focus:input-primary transition-all"
+                  value={formData.email}
+                  onChange={(e) =>
+                    setFormData({ ...formData, email: e.target.value })
+                  }
+                />
+              </div>
+
+            <div className="relative">
+                <Lock className="absolute left-2 top-2 size-6 z-10 text-base-content/40" />
+                <input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Password"
+                  className="input input-bordered w-full pl-10 pr-10 focus:input-primary transition-all"
+                  value={formData.password}
+                  onChange={(e) =>
+                    setFormData({ ...formData, password: e.target.value })
+                  }
+                />
+                <button
+                  type="button"
+                  className="absolute right-3 top-3.5"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? (
+                    <EyeOff className="size-5 text-base-content/40" />
+                  ) : (
+                    <Eye className="size-5 text-base-content/40" />
+                  )}
+                </button>
+              </div>  
+
+           
+
+            {/* Submit Button */}
+            <button
+              type="submit"
+              className="btn btn-primary w-full shadow-lg shadow-primary/20"
+              disabled={isLoggingIn}
+            >
+              {isLoggingIn ? (
+                <>
+                  <Loader2 className="size-5 animate-spin" />
+                  Logging in...
+                </>
+              ) : (
+                "Sign In"
+              )}
+            </button>
+          </form>
+
+          {/* Footer Link */}
+          <div className="text-center">
+            <p className="text-base-content/60">
+              Don&apos;t have an account?{" "}
+              <Link to="/signup" className="link link-primary font-medium">
+                Create account
+              </Link>
+            </p>
+            <p className="text-base-content/60">
+             <Link to="/forget-password" className="link link-primary font-medium" >forgot password?</Link>
+            </p>
+          </div>
+        </motion.div>
+      </div>
+
+      {/* Right Side - Branding/Visuals */}
+      <AuthImagePattern
+        title="Join our community"
+        subtitle="Connect, chat and build meaningful conversations."
+      />
+    </div>
+  );
+};
+
+export default Login;
+</file>
+
+<file path="Frontend/src/pages/ProfilePage.jsx">
+import React, { useState } from 'react';
+import { useAuthStore } from '../store/useAuthStore';
+import { Camera, Mail, User } from "lucide-react";
+import { motion } from "framer-motion";
+
+const ProfilePage = () => {
+  const { authUser, isUpdatingProfile, updateProfile } = useAuthStore();
+  const [selectedImg, setSelectedImg] = useState(null);
+
+  // Random avatar logic based on name
+  const avatarPlaceholder = `https://api.dicebear.com/7.x/avataaars/svg?seed=${authUser?.fullName || 'user'}`;
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+
+    reader.onload = async () => {
+      const base64Image = reader.result;
+      setSelectedImg(base64Image);
+      await updateProfile({ profilePic: base64Image });
+    };
+  };
+
+  return (
+    // min-h-screen use kiya hai taaki scroll issue khatam ho jaye
+    <div className="min-h-screen pt-20 pb-10 bg-base-200">
+      <div className="max-w-2xl mx-auto px-4">
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.3 }}
+          className="bg-base-100 rounded-2xl p-6 space-y-8 shadow-xl border border-base-300"
+        >
+          <div className="text-center">
+            <h1 className="text-2xl font-bold">My Profile</h1>
+            <p className="mt-1 text-base-content/60 text-sm">Manage your account information</p>
+          </div>
+
+          {/* Avatar Upload Section */}
+          <div className="flex flex-col items-center gap-4">
+            <div className="relative">
+              <img
+                src={selectedImg || authUser.profilePic || avatarPlaceholder}
+                alt="Profile"
+                className="size-32 rounded-full object-cover border-4 border-primary/20 shadow-inner"
+              />
+              <label
+                htmlFor="avatar-upload"
+                className={`
+                  absolute bottom-0 right-0 
+                  bg-primary hover:bg-primary-focus
+                  p-2.5 rounded-full cursor-pointer 
+                  transition-all duration-200
+                  shadow-lg border-2 border-base-100
+                  ${isUpdatingProfile ? "animate-pulse pointer-events-none" : ""}
+                `}
+              >
+                <Camera className="w-5 h-5 text-primary-content" />
+                <input
+                  type="file"
+                  id="avatar-upload"
+                  className="hidden"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  disabled={isUpdatingProfile}
+                />
+              </label>
+            </div>
+            <p className="text-xs text-base-content/50 font-medium">
+              {isUpdatingProfile ? "Uploading your new look..." : "Click the icon to change your photo"}
+            </p>
+          </div>
+
+          {/* Info Section */}
+          <div className="grid gap-6">
+            <div className="space-y-1.5">
+              <div className="text-xs font-semibold text-base-content/40 uppercase tracking-wider flex items-center gap-2 px-1">
+                <User className="w-3.5 h-3.5" />
+                Full Name
+              </div>
+              <div className="px-4 py-3 bg-base-200 rounded-xl border border-base-300 font-medium text-base-content/80">
+                {authUser?.fullName}
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <div className="text-xs font-semibold text-base-content/40 uppercase tracking-wider flex items-center gap-2 px-1">
+                <Mail className="w-3.5 h-3.5" />
+                Email Address
+              </div>
+              <div className="px-4 py-3 bg-base-200 rounded-xl border border-base-300 font-medium text-base-content/80">
+                {authUser?.email}
+              </div>
+            </div>
+          </div>
+
+          {/* Account Details Card */}
+          <div className="bg-base-200 rounded-xl p-5 border border-base-300">
+            <h2 className="text-sm font-bold uppercase tracking-widest text-base-content/50 mb-4">Account Stats</h2>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between text-sm py-2 border-b border-base-content/5">
+                <span className="text-base-content/70">Joined On</span>
+                <span className="font-mono">{authUser.createdAt?.split("T")[0]}</span>
+              </div>
+              <div className="flex items-center justify-between text-sm py-2">
+                <span className="text-base-content/70">Account Status</span>
+                <span className="flex items-center gap-1.5 font-bold text-success">
+                  <span className="size-2 bg-success rounded-full animate-pulse" />
+                  Verified & Active
+                </span>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      </div>
+    </div>
+  );
+}
+
+export default ProfilePage;
+</file>
+
+<file path="Frontend/src/pages/ResetOtpPassword.jsx">
+import { useEffect, useRef, useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { motion } from "framer-motion";
+import { useAuthStore } from "../store/useAuthStore";
+import toast from "react-hot-toast";
+import { Loader2 } from "lucide-react";
+
+const ResetOtpPassword = () => {
+  const [code, setCode] = useState(["", "", "", "", "", ""]);
+  const inputRefs = useRef([]);
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Forgot Password page se aaya hua email
+  const email = location.state?.email || ""; 
+
+  // useAuthStore se password reset wale functions nikal rahe hain
+  const { verifyResetOtp, isVerifyingResetOtp } = useAuthStore();
+
+  const handleChange = (index, value) => {
+    const newCode = [...code];
+    if (value.length > 1) {
+      const pastedCode = value.slice(0, 6).split("");
+      for (let i = 0; i < 6; i++) {
+        newCode[i] = pastedCode[i] || "";
+      }
+      setCode(newCode);
+      const lastIndex = newCode.findLastIndex((digit) => digit !== "");
+      const focusIndex = lastIndex < 5 ? lastIndex + 1 : 5;
+      inputRefs.current[focusIndex].focus();
+    } else {
+      newCode[index] = value;
+      setCode(newCode);
+      if (value && index < 5) {
+        inputRefs.current[index + 1].focus();
+      }
+    }
+  };
+
+  const handleKeyDown = (index, e) => {
+    if (e.key === "Backspace" && !code[index] && index > 0) {
+      inputRefs.current[index - 1].focus();
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    if (e) e.preventDefault();
+    const verificationCode = code.join("");
+
+    try {
+      // Step 2: OTP verify karo backend se
+      await verifyResetOtp({ email, otp: verificationCode });
+      
+      toast.success("Code verified! Now set your new password.");
+      
+      // Verification ke BAAD user ko Reset Password page par bhejo
+      // Saath mein email aur otp bhi bhej rahe hain taaki Final Reset API call ho sake
+      navigate("/reset-password", { state: { email, otp: verificationCode } }); 
+      
+    } catch (error) {
+      toast.error(error.message || "Verification failed");
+    }
+  };
+
+  useEffect(() => {
+    if (code.every((digit) => digit !== "")) {
+      handleSubmit();
+    }
+  }, [code]);
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-base-200 p-4">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="max-w-md w-full bg-base-100 p-8 rounded-2xl shadow-xl border border-white/5 text-center"
+      >
+        {/* Text updated for Reset Context */}
+        <h2 className="text-3xl font-bold mb-2">Password Reset</h2>
+        <p className="text-base-content/60 mb-8">
+          Enter the reset code sent to <br />
+          <span className="font-semibold text-primary">{email}</span>
+        </p>
+
+        <form onSubmit={handleSubmit} className="space-y-8">
+          <div className="flex justify-between gap-2">
+            {code.map((digit, index) => (
+              <input
+                key={index}
+                ref={(el) => (inputRefs.current[index] = el)}
+                type="text"
+                maxLength="1"
+                value={digit}
+                onChange={(e) => handleChange(index, e.target.value)}
+                onKeyDown={(e) => handleKeyDown(index, e)}
+                className="w-12 h-14 text-2xl font-bold text-center bg-base-200 border-2 border-base-300 rounded-lg focus:border-primary focus:outline-none transition-all"
+              />
+            ))}
+          </div>
+
+          <button
+            type="submit"
+            disabled={isVerifyingResetOtp || code.some((digit) => !digit)}
+            className="btn btn-primary w-full shadow-lg shadow-primary/20"
+          >
+            {isVerifyingResetOtp ? (
+              <Loader2 className="animate-spin" />
+            ) : (
+              "Verify & Continue"
+            )}
+          </button>
+        </form>
+
+        <div className="mt-6">
+          <button className="text-sm link link-primary no-underline hover:underline">
+            Resend Reset Code
+          </button>
+        </div>
+      </motion.div>
+    </div>
+  );
+};
+
+export default ResetOtpPassword;
+</file>
+
+<file path="Frontend/src/pages/ResetPasswordPage.jsx">
+import { useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useAuthStore } from "../store/useAuthStore";
+import { Lock, Eye, EyeOff, Loader2, CheckCircle2 } from "lucide-react";
+import { motion } from "framer-motion";
+import toast from "react-hot-toast";
+
+const ResetPasswordPage = () => {
+  const [showPassword, setShowPassword] = useState(false);
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
+  const { resetPassword, isResettingPassword } = useAuthStore();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // OTP page se pass kiya hua data nikal rahe hain
+  const { email, otp } = location.state || {};
+
+  // Security check: Agar koi direct is page par aaye bina OTP verify kiye
+  if (!email || !otp) {
+    navigate("/forgot-password");
+    return null;
+  }
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (password !== confirmPassword) {
+      return toast.error("Passwords do not match!");
+    }
+
+    if (password.length < 6) {
+      return toast.error("Password must be at least 6 characters long");
+    }
+
+    try {
+      await resetPassword({ email, otp, newPassword: password });
+      // Success toast store ke andar se hi aa jayega
+      navigate("/login");
+    } catch (error) {
+      console.log("Error resetting password:", error);
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-base-200 p-4">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="max-w-md w-full bg-base-100 p-8 rounded-2xl shadow-xl border border-white/5"
+      >
+        <div className="text-center mb-8">
+          <div className="size-12 rounded-xl bg-success/10 flex items-center justify-center mx-auto mb-4">
+            <CheckCircle2 className="size-6 text-success" />
+          </div>
+          <h1 className="text-2xl font-bold">New Password</h1>
+          <p className="text-base-content/60">Please enter your new secure password</p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* New Password Input */}
+          <div className="form-control">
+            <div className="relative">
+              <Lock className="absolute left-3 top-3 size-5 text-base-content/40" />
+              <input
+                type={showPassword ? "text" : "password"}
+                className="input input-bordered w-full pl-10 pr-10 focus:input-primary transition-all"
+                placeholder="New Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+              <button
+                type="button"
+                className="absolute right-3 top-3"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? (
+                  <EyeOff className="size-5 text-base-content/40" />
+                ) : (
+                  <Eye className="size-5 text-base-content/40" />
+                )}
+              </button>
+            </div>
+          </div>
+
+          {/* Confirm Password Input */}
+          <div className="form-control">
+            <div className="relative">
+              <Lock className="absolute left-3 top-3 size-5 text-base-content/40" />
+              <input
+                type={showPassword ? "text" : "password"}
+                className="input input-bordered w-full pl-10 focus:input-primary transition-all"
+                placeholder="Confirm Password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+              />
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            className="btn btn-primary w-full shadow-lg shadow-primary/20"
+            disabled={isResettingPassword}
+          >
+            {isResettingPassword ? (
+              <>
+                <Loader2 className="size-5 animate-spin" />
+                Updating...
+              </>
+            ) : (
+              "Reset Password"
+            )}
+          </button>
+        </form>
+      </motion.div>
+    </div>
+  );
+};
+
+export default ResetPasswordPage;
+</file>
+
+<file path="Frontend/src/pages/SettingsPage.jsx">
+import { useThemeStore } from "../store/useThemeStore";
+
+const THEMES = ["light", "dark", "cupcake", "bumblebee", "emerald", "corporate", "synthwave", "retro", "cyberpunk", "valentine", "halloween", "garden", "forest", "aqua", "lofi", "pastel", "fantasy", "wireframe", "black", "luxury", "dracula", "cmyk", "autumn", "business", "acid", "lemonade", "night", "coffee", "winter", "dim", "nord", "sunset"];
+
+import React from 'react';
+import { Send } from "lucide-react";
+
+const PREVIEW_MESSAGES = [
+  { id: 1, content: "Hey! How's it going?", isSent: false },
+  { id: 2, content: "I'm doing great! Just working on some new features.", isSent: true },
+];
+
+const SettingsPage = () => {
+      const { theme, setTheme } = useThemeStore();
+
+  return (
+    <div className="min-h-screen container mx-auto px-4 pt-20 max-w-5xl">
+      <div className="space-y-6">
+        <div className="flex flex-col gap-1">
+          <h2 className="text-lg font-semibold">Theme</h2>
+          <p className="text-sm text-base-content/70">Choose a theme for your chat interface</p>
+        </div>
+
+        <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2">
+          {THEMES.map((t) => (
+            <button
+              key={t}
+              className={`
+                group flex flex-col items-center gap-1.5 p-2 rounded-lg transition-colors
+                ${theme === t ? "bg-base-200" : "hover:bg-base-200/50"}
+              `}
+              onClick={() => setTheme(t)}
+            >
+              <div className="relative h-8 w-full rounded-md overflow-hidden" data-theme={t}>
+                <div className="absolute inset-0 grid grid-cols-4 gap-px p-1">
+                  <div className="rounded bg-primary"></div>
+                  <div className="rounded bg-secondary"></div>
+                  <div className="rounded bg-accent"></div>
+                  <div className="rounded bg-neutral"></div>
+                </div>
+              </div>
+              <span className="text-[11px] font-medium truncate w-full text-center">
+                {t.charAt(0).toUpperCase() + t.slice(1)}
+              </span>
+            </button>
+          ))}
+        </div>
+
+        {/* Preview Section */}
+        <h3 className="text-lg font-semibold mb-3">Preview</h3>
+        <div className="rounded-xl border border-base-300 overflow-hidden bg-base-100 shadow-lg">
+          <div className="p-4 bg-base-200">
+            <div className="max-w-lg mx-auto">
+              {/* Mock Chat UI */}
+              <div className="bg-base-100 rounded-xl shadow-sm overflow-hidden">
+                {/* Chat Header */}
+                <div className="px-4 py-3 border-b border-base-300 bg-base-100">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-content font-medium">
+                      J
+                    </div>
+                    <div>
+                      <h3 className="font-medium text-sm">John Doe</h3>
+                      <p className="text-xs text-base-content/70">Online</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Chat Messages */}
+                <div className="p-4 space-y-4 min-h-[200px] max-h-[200px] overflow-y-auto bg-base-100">
+                  {PREVIEW_MESSAGES.map((message) => (
+                    <div
+                      key={message.id}
+                      className={`flex ${message.isSent ? "justify-end" : "justify-start"}`}
+                    >
+                      <div
+                        className={`
+                          max-w-[80%] rounded-xl p-3 shadow-sm
+                          ${message.isSent ? "bg-primary text-primary-content" : "bg-base-200"}
+                        `}
+                      >
+                        <p className="text-sm">{message.content}</p>
+                        <p
+                          className={`
+                            text-[10px] mt-1.5
+                            ${message.isSent ? "text-primary-content/70" : "text-base-content/70"}
+                          `}
+                        >
+                          12:00 PM
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Chat Input */}
+                <div className="p-4 border-t border-base-300 bg-base-100">
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      className="input input-bordered flex-1 text-sm h-10"
+                      placeholder="Type a message..."
+                      value="This is a preview"
+                      readOnly
+                    />
+                    <button className="btn btn-primary h-10 min-h-0">
+                      <Send size={18} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default SettingsPage
+</file>
+
+<file path="Frontend/src/pages/SignUpPage.jsx">
+import { useState } from "react";
+import { useAuthStore } from "../store/useAuthStore";
+import { Eye, EyeOff, Loader2, Lock, Mail, MessageSquare, User } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import AuthImagePattern from "../components/AuthImagePattern";
+import toast from "react-hot-toast";
+
+const SignUpPage = () => {
+  const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
+
+  const [formData, setFormData] = useState({
+    fullName: "",
+    email: "",
+    password: "",
+  });
+
+  const { signup, isSigningUp } = useAuthStore();
+
+  const validateForm = () => {
+    if (!formData.fullName.trim()) return toast.error("Full name is required");
+    if (!formData.email.trim()) return toast.error("Email is required");
+    if (!/\S+@\S+\.\S+/.test(formData.email)) return toast.error("Invalid email");
+    if (!formData.password) return toast.error("Password required");
+    if (formData.password.length < 6) return toast.error("Min 6 characters");
+
+    return true;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const success = validateForm();
+
+    if (success) {
+      try{
+       const res = await signup(formData);
+       if (res?.success || res?.email) {
+        toast.success("OTP sent to your email!");
+        navigate("/verify-email", { state: { email: formData.email } });
+      }
+      }catch(error){
+        toast.error(error.message || "Signup failed");
+      }  
+      
+    }
+  };
+
+  return (
+    <div className="min-h-screen grid lg:grid-cols-2 bg-linear-to-br from-base-200 via-base-100 to-base-200">
+      {/* LEFT */}
+      <div className="flex items-center justify-center p-6 sm:p-12">
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="w-full max-w-md"
+        >
+          <div className="backdrop-blur-xl bg-base-100/60 border border-base-content/10 shadow-2xl rounded-3xl p-8 space-y-6">
+            
+            {/* LOGO */}
+            <div className="text-center space-y-2">
+              <div className="mx-auto size-14 rounded-2xl bg-primary/10 flex items-center justify-center">
+                <MessageSquare className="text-primary size-7" />
+              </div>
+              <h1 className="text-3xl font-bold">Create Account</h1>
+              <p className="text-base-content/60">Start chatting in seconds 🚀</p>
+            </div>
+
+            {/* FORM */}
+            <form onSubmit={handleSubmit} className="space-y-5">
+              {/* NAME */}
+              <div className="relative">
+                <User className="absolute z-10 size-6 left-2 top-2 text-base-content/40" />
+                <input
+                  type="text"
+                  placeholder="Full Name"
+                  className="input input-bordered w-full pl-10 focus:input-primary transition-all"
+                  value={formData.fullName}
+                  onChange={(e) =>
+                    setFormData({ ...formData, fullName: e.target.value })
+                  }
+                />
+              </div>
+
+              {/* EMAIL */}
+              <div className="relative">
+                <Mail className="absolute left-2 top-2 size-6 z-10 text-base-content/40" />
+                <input
+                  type="email"
+                  placeholder="Email address"
+                  className="input input-bordered w-full pl-10 focus:input-primary transition-all"
+                  value={formData.email}
+                  onChange={(e) =>
+                    setFormData({ ...formData, email: e.target.value })
+                  }
+                />
+              </div>
+
+              {/* PASSWORD */}
+              <div className="relative">
+                <Lock className="absolute left-2 top-2 size-6 z-10 text-base-content/40" />
+                <input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Password"
+                  className="input input-bordered w-full pl-10 pr-10 focus:input-primary transition-all"
+                  value={formData.password}
+                  onChange={(e) =>
+                    setFormData({ ...formData, password: e.target.value })
+                  }
+                />
+                <button
+                  type="button"
+                  className="absolute right-3 top-3.5"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? (
+                    <EyeOff className="size-5 text-base-content/40" />
+                  ) : (
+                    <Eye className="size-5 text-base-content/40" />
+                  )}
+                </button>
+              </div>
+
+              {/* BUTTON */}
+              <motion.button
+                whileTap={{ scale: 0.97 }}
+                whileHover={{ scale: 1.02 }}
+                type="submit"
+                className="btn btn-primary w-full text-base"
+                disabled={isSigningUp}
+              >
+                {isSigningUp ? (
+                  <>
+                    <Loader2 className="animate-spin size-5" />
+                    Creating...
+                  </>
+                ) : (
+                  "Create Account"
+                )}
+              </motion.button>
+            </form>
+
+            {/* LOGIN */}
+            <p className="text-center text-base-content/60">
+              Already have an account?{" "}
+              <Link to="/login" className="text-primary font-medium hover:underline">
+                Sign in
+              </Link>
+            </p>
+          </div>
+        </motion.div>
+      </div>
+
+      {/* RIGHT */}
+      <AuthImagePattern
+        title="Join our community"
+        subtitle="Connect, chat and build meaningful conversations."
+      />
+    </div>
+  );
+};
+
+export default SignUpPage;
+</file>
+
+<file path="Frontend/src/pages/VerifyEmailPage.jsx">
+import { useEffect, useRef, useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { motion } from "framer-motion";
+import { useAuthStore } from "../store/useAuthStore";
+import toast from "react-hot-toast";
+import { Loader2 } from "lucide-react";
+
+const VerifyEmailPage = () => {
+  const [code, setCode] = useState(["", "", "", "", "", ""]);
+
+  const inputRefs = useRef([]);
+
+  const navigate = useNavigate();
+
+  const location = useLocation();
+
+  const email = location.state?.email || ""; 
+
+  const { verifyEmail, isVerifyingEmail } = useAuthStore();
+
+  const handleChange = (index, value) => {
+    if (!/^\d*$/.test(value)) return;
+    const newCode = [...code];
+
+    // Sirf numbers allow karo
+    if (value.length > 1) {
+      const pastedCode = value.slice(0, 6).split("");
+      for (let i = 0; i < 6; i++) {
+        newCode[i] = pastedCode[i] || "";
+      }
+
+      setCode(newCode);
+      // Last filled box par focus karo
+      const lastIndex = newCode.findLastIndex((digit) => digit !== "");
+      const focusIndex = lastIndex < 5 ? lastIndex + 1 : 5;
+      inputRefs.current[focusIndex].focus();
+    } else {
+      newCode[index] = value;
+      setCode(newCode);
+      // Agle box par move karo
+      if (value && index < 5) {
+        inputRefs.current[index + 1].focus();
+      }
+    }
+  };
+
+  const handleKeyDown = (index, e) => {
+    if (e.key === "Backspace" && !code[index] && index > 0) {
+      inputRefs.current[index - 1].focus();
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const verificationCode = code.join("");
+
+    try {
+      await verifyEmail({ email, otp: verificationCode });
+      navigate("/"); // Dashboard par bhejo
+    } catch (error) {
+      toast.error(error.message || "Verification failed");
+    }
+  };
+
+  // Auto-submit jab saare boxes bhar jayein
+  useEffect(() => {
+    if (code.every((digit) => digit !== "")) {
+      handleSubmit(new Event("submit"));
+    }
+  }, [code]);
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-base-200 p-4">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="max-w-md w-full bg-base-100 p-8 rounded-2xl shadow-xl border border-white/5 text-center"
+      >
+        <h2 className="text-3xl font-bold mb-2">Verify Your Email</h2>
+        <p className="text-base-content/60 mb-8">Enter the 6-digit code sent to <br /><span className="font-semibold text-primary">{email}</span></p>
+
+        <form onSubmit={handleSubmit} className="space-y-8">
+          <div className="flex justify-between gap-2">
+            {code.map((digit, index) => (
+              <input
+                key={index}
+                ref={(el) => (inputRefs.current[index] = el)}
+                type="text"
+                maxLength="6"
+                value={digit}
+                onChange={(e) => handleChange(index, e.target.value)}
+                onKeyDown={(e) => handleKeyDown(index, e)}
+                className="w-12 h-14 text-2xl font-bold text-center bg-base-200 border-2 border-base-300 rounded-lg focus:border-primary focus:outline-none transition-all"
+              />
+            ))}
+          </div>
+
+          <button
+            type="submit"
+            disabled={isVerifyingEmail || code.some((digit) => !digit)}
+            className="btn btn-primary w-full shadow-lg shadow-primary/20"
+          >
+            {isVerifyingEmail ? <Loader2 className="animate-spin" /> : "Verify Email"}
+          </button>
+        </form>
+
+        <div className="mt-6">
+            <button className="text-sm link link-primary no-underline hover:underline">
+                Didn't receive code? Resend
+            </button>
+        </div>
+      </motion.div>
+    </div>
+  );
+};
+
+export default VerifyEmailPage;
+</file>
+
+<file path="Frontend/src/store/useAuthStore.js">
+// src/store/useAuthStore.js
+import { create } from "zustand";
+import  { axiosInstance } from "../lib/axios.js"; // Axios instance with baseURL
+
+import toast from "react-hot-toast";
+import { io } from "socket.io-client";
+
+const BASE_URL = import.meta.env.MODE === "development" ? "http://localhost:5000" : "/";
+
+export const useAuthStore = create((set, get) => ({
+  authUser: null,
+  isSigningUp: false,
+  isLoggingIn: false,
+  isCheckingAuth: true,
+  isUpdatingProfile: false,
+  isVerifyingEmail: false,
+  isSendingResetOtp: false,
+  isVerifyingResetOtp: false, 
+  isResettingPassword: false,
+  onlineUsers: [],
+  socket: null,
+
+  checkAuth: async () => {
+    try {
+      const res = await axiosInstance.get("/auth/check");
+      set({ authUser: res.data });
+      get().connectSocket();
+    } catch (error) {
+       console.log("Error in checkAuth:", error);
+       set({ authUser: null });
+    } finally {
+      set({ isCheckingAuth: false });
+    }
+  },
+
+  signup: async (data) => {
+    set({ isSigningUp: true });
+    try {
+      const res = await axiosInstance.post("/auth/signup", data);
+      return res.data;
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Signup failed");
+      throw error;
+    } finally {
+      set({ isSigningUp: false });
+    }
+  },
+ 
+  // 5. Password Reset Step 2: Verify Reset OTP (Naya Function)
+  verifyResetOtp: async (data) => {
+    set({ isVerifyingResetOtp: true });
+    try {
+      const res = await axiosInstance.post("/auth/verify-reset-otp", data);
+      toast.success("OTP Verified! Set your new password.");
+      return res.data;
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Invalid or expired OTP");
+      throw error;
+    } finally {
+      set({ isVerifyingResetOtp: false });
+    }
+  },
+
+  login: async (data) => {
+    set({ isLoggingIn: true });
+    try {
+      const res = await axiosInstance.post("/auth/login", data);
+      set({ authUser: res.data });
+      toast.success("Logged in successfully!");
+      get().connectSocket();
+      return res.data;
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Login failed");
+      throw error;
+    } finally {
+      set({ isLoggingIn: false });
+    }
+  },
+
+  logout: async () => {
+    try {
+      await axiosInstance.post("/auth/logout");
+      set({ authUser: null });
+      get().disconnectSocket();
+      toast.success("Logged out successfully!");
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Logout failed");
+    }
+  },
+
+  verifyEmail: async (data) => {
+    set({ isVerifyingEmail: true });
+    try {
+      const res = await axiosInstance.post("/auth/verify-email", data);
+      set({ authUser: res.data });
+      get().connectSocket();
+      toast.success("Email verified successfully!");
+      return res.data;
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Invalid OTP");
+      throw error;
+    } finally {
+      set({ isVerifyingEmail: false });
+    }
+  },
+
+  forgotPassword: async (email) => {
+    set({ isSendingResetOtp: true });
+    try {
+      const res = await axiosInstance.post("/auth/forgot-password", { email });
+      toast.success("OTP sent to your email");
+      return res.data;
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to send OTP");
+      throw error;
+    } finally {
+      set({ isSendingResetOtp: false });
+    }
+  },
+
+  resetPassword: async (data) => {
+    set({ isResettingPassword: true });
+    try {
+      const res = await axiosInstance.post("/auth/reset-password", data);
+      toast.success("Password reset successfully!");
+      return res.data;
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to reset password");
+      throw error;
+    } finally {
+      set({ isResettingPassword: false });
+    }
+  },
+
+  updateProfile: async (data) => {
+    set({ isUpdatingProfile: true });
+    try {
+      const res = await axiosInstance.put("/auth/update-profile", data);
+      set({ authUser: res.data });
+      toast.success("Profile updated successfully!");
+      return res.data;
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to update profile");
+      throw error;
+    } finally {
+      set({ isUpdatingProfile: false });
+    }
+  },
+
+  connectSocket: () => {
+    const { authUser } = get();
+    if (!authUser) return;
+    
+    const existingSocket = get().socket;
+    // Only return if socket already exists and is properly connected
+    if (existingSocket) {
+      if (existingSocket.connected) return;
+      // If socket exists but disconnected, disconnect it first
+      existingSocket.disconnect();
+    }
+
+    const socket = io(BASE_URL, {
+      query: {
+        userId: authUser._id,
+      },
+      reconnection: true,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 5000,
+      reconnectionAttempts: 5,
+    });
+
+    // Set up listener BEFORE connecting
+    socket.on("getOnlineUsers", (userIds) => {
+      console.log("Online users updated:", userIds);
+      set({ onlineUsers: userIds });
+    });
+
+    socket.on("connect", () => {
+      console.log("Socket connected:", socket.id);
+    });
+
+    socket.on("disconnect", () => {
+      console.log("Socket disconnected");
+    });
+
+    socket.on("reconnect", () => {
+      console.log("Socket reconnected");
+    });
+
+    set({ socket });
+  },
+
+  disconnectSocket: () => {
+    const { socket } = get();
+    if (socket?.connected) socket.disconnect();
+    set({ socket: null });
+  },
+}));
+</file>
+
+<file path="Frontend/src/store/useChatStore.js">
+import {create} from "zustand"
+import toast from "react-hot-toast";
+import { axiosInstance } from "../lib/axios.js";
+import { useAuthStore } from "./useAuthStore.js";
+
+
+
+export const useChatStore = create((set,get)=>({
+  messages: [],
+  users: [],
+  selectedUser: null,
+  isUsersLoading: false,
+  isMessagesLoading: false,
+
+  getUsers: async () => {
+    set({ isUsersLoading: true });
+    try {
+      const res = await axiosInstance.get("/messages/users");
+      set({ users: res.data });
+    } catch (error) {
+      toast.error(error.response.data.message);
+    } finally {
+      set({ isUsersLoading: false });
+    }
+  },
+
+  getMessages: async (userId) =>{
+    set({isMessagesLoading:true});
+    try{
+      const res = await axiosInstance.get(`/messages/${userId}`)
+      set({ messages: res.data });
+    }catch(error){
+      toast.error(error.response.data.message);
+    }finally{
+      set({isMessagesLoading:false});
+    }
+  },
+
+  sendMessage: async(messageData) =>{
+    const { selectedUser, messages } = get();
+     try {
+      const res = await axiosInstance.post(`/messages/send/${selectedUser._id}`, messageData);
+      set({ messages: [...messages, res.data] });
+    } catch (error) {
+      toast.error(error.response.data.message);
+    }
+
+  },
+
+subscribeToMessages: () => {
+  const { selectedUser } = get();
+  if (!selectedUser) return;
+
+  const socket = useAuthStore.getState().socket;
+
+  // 🚩 SAFETY FIRST: Pehle purana listener hatao (agar koi ho)
+  // Taaki multiple listeners na ban jayein
+  socket.off("newMessage");
+
+  socket.on("newMessage", (newMessage) => {
+    // Logic: Kya ye message usi bande ne bheja hai jisse main baat kar raha hoon?
+    const isMessageFromSelectedUser = newMessage.senderId === selectedUser._id;
+    
+    if (!isMessageFromSelectedUser) return;
+
+    // Messages array ko update karo
+    set({
+      messages: [...get().messages, newMessage],
+    });
+  });
+},
+
+unsubscribeFromMessages: () => {
+  const socket = useAuthStore.getState().socket;
+  if (socket) socket.off("newMessage");
+},
+
+setSelectedUser: (selectedUser) => set({ selectedUser }),
+
+
+})
+
+);
+</file>
+
+<file path="Frontend/src/store/useThemeStore.js">
+import { create } from "zustand";
+
+export const useThemeStore = create((set) => ({
+  // LocalStorage se theme uthao, varna default "coffee" ya "dark" rakho
+  theme: localStorage.getItem("chat-theme") || "dark",
+  
+  setTheme: (theme) => {
+    localStorage.setItem("chat-theme", theme);
+    set({ theme });
+  },
+}));
+</file>
+
+<file path="Frontend/vite.config.js">
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import tailwindcss from '@tailwindcss/vite'
+
+// https://vite.dev/config/
+export default defineConfig({
+  plugins: [react(), tailwindcss()],
+  define: {
+    global: 'globalThis',
+  },
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+        secure: false,
+      }
+    }
+  },
+  build: {
+    outDir: 'dist',
+    sourcemap: false,
+    minify: 'terser',
+  }
+})
+</file>
+
+<file path="package.json">
+{
+  "name": "baat-cheet",
+  "version": "1.0.0",
+  "description": "A real-time chat application",
+  "main": "api/index.js",
+  "scripts": {
+    "build": "npm install --prefix Backend && npm install --prefix Frontend && npm run build --prefix Frontend",
+    "start": "node api/index.js",
+    "dev": "npm run dev --prefix Frontend",
+    "dev:backend": "npm run dev --prefix Backend",
+    "install": "npm install --prefix Backend && npm install --prefix Frontend"
+  },
+  "keywords": ["chat", "real-time", "socket.io"],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "engines": {
+    "node": "18.x"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cloudinary": "^2.9.0",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.6",
+    "dotenv": "^17.2.4",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^9.2.0",
+    "nodemailer": "^8.0.1",
+    "resend": "^6.9.2",
+    "socket.io": "^4.8.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.11"
+  }
+}
+</file>
+
+</files>

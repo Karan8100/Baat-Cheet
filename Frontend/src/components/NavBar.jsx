@@ -1,6 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import { useAuthStore } from "../store/useAuthStore";
 import { LogOut, MessageSquare, Settings, User } from "lucide-react";
+import { Image } from "lucide-react";
 
 const Navbar = () => {
   const { logout, authUser } = useAuthStore();
@@ -18,12 +19,11 @@ const Navbar = () => {
           {/* LEFT: LOGO SECTION */}
           <div className="flex items-center gap-8">
             <Link to="/" className="flex items-center gap-2.5 transition-all active:scale-95 group">
-              <div className="size-10 rounded-xl bg-primary flex items-center justify-center shadow-md group-hover:rotate-6 transition-transform">
-                <MessageSquare className="w-6 h-6 text-primary-content" />
-              </div>
-              <span className="text-xl font-extrabold tracking-tight text-base-content uppercase">
-                Baat-<span className="text-primary">Cheet</span>
-              </span>
+              <img 
+                src="/logo.png" 
+                alt="Baat-Cheet Logo" 
+                className="h-15 w-auto group-hover:drop-shadow-md transition-all"
+              />
             </Link>
           </div>
 

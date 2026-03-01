@@ -1,14 +1,36 @@
 {
   "name": "baat-cheet",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "A real-time chat application",
+  "main": "api/index.js",
   "scripts": {
-    "build":"npm install --prefix Backend && npm install --prefix Frontend && npm run build --prefix Frontend",
-    "start":"npm run start --prefix Backend"
+    "build": "npm install --prefix Backend && npm install --prefix Frontend && npm run build --prefix Frontend",
+    "start": "node api/index.js",
+    "dev": "npm run dev --prefix Frontend",
+    "dev:backend": "npm run dev --prefix Backend",
+    "install": "npm install --prefix Backend && npm install --prefix Frontend"
   },
-  "keywords": [],
+  "keywords": ["chat", "real-time", "socket.io"],
   "author": "",
   "license": "ISC",
-  "type": "commonjs"
+  "type": "module",
+  "engines": {
+    "node": "18.x"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cloudinary": "^2.9.0",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.6",
+    "dotenv": "^17.2.4",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^9.2.0",
+    "nodemailer": "^8.0.1",
+    "resend": "^6.9.2",
+    "socket.io": "^4.8.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.11"
+  }
 }
