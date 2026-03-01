@@ -10,7 +10,7 @@ dotenv.config(); // Ye line process.env ko populate karti hai
 
 import path from "path";
 
-const __dirname = path.resolve();
+
 
 
 
@@ -20,6 +20,8 @@ const port = process.env.PORT;
 //middlewares
 app.use(express.json({ limit: "5mb" }));
 app.use(cookieParser());
+
+app.set("trust proxy", 1);
 
 // Dynamic CORS configuration for production
 // const getAllowedOrigins = () => {
