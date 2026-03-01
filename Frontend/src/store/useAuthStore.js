@@ -9,11 +9,13 @@ import { io } from "socket.io-client";
 const getBaseURL = () => {
   // If VITE_API_URL is set, use it for socket connection
   if (import.meta.env.VITE_API_URL) {
+    console.log("✅ Using VITE_API_URL:", import.meta.env.VITE_API_URL);
     return import.meta.env.VITE_API_URL;
   }
   
   // Development fallback
   if (import.meta.env.MODE === "development") {
+    console.log("✅ Using development localhost");
     return "http://localhost:5000";
   }
   
@@ -175,6 +177,7 @@ export const useAuthStore = create((set, get) => ({
       existingSocket.disconnect();
     }
 
+    console.log("📡 Connecting to socket at:", BASE_URL);
     const socket = io(BASE_URL, {
       query: {
         userId: authUser._id,
@@ -192,7 +195,7 @@ export const useAuthStore = create((set, get) => ({
     });
 
     socket.on("connect", () => {
-      console.log("Socket connected:", socket.id);
+      console.log("✅ Socket connected:", socket.id);
     });
 
     socket.on("disconnect", () => {
@@ -200,7 +203,11 @@ export const useAuthStore = create((set, get) => ({
     });
 
     socket.on("reconnect", () => {
-      console.log("Socket reconnected");
+      console.log("✅ Socket reconnected");
+    });
+
+    socket.on("connect_error", (error) => {
+      console.error("❌ Socket connection error:", error);
     });
 
     set({ socket });
