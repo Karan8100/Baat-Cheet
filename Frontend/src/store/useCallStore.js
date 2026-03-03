@@ -271,16 +271,34 @@ export const useCallStore = create((set, get) => ({
       }
     });
 
+    // socket.on("call:ice-candidate", async ({ candidate }) => {
+    //   const { peerConnection } = get();
+
+    //   if (!peerConnection) {
+    //     console.warn("Received ICE candidate but no peer connection");
+    //     return;
+    //   }
+
+    //   if (!peerConnection.remoteDescription) {
+    //     console.log("Buffering ICE candidate (no remote description yet)");
+    //     set({ pendingIceCandidates: [...get().pendingIceCandidates, candidate] });
+    //     return;
+    //   }
+
+    //   try {
+    //     console.log("Adding ICE candidate...");
+    //     await peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+    //   } catch (error) {
+    //     console.error("Failed to add ICE candidate", error);
+    //   }
+    // });
+
     socket.on("call:ice-candidate", async ({ candidate }) => {
       const { peerConnection } = get();
 
-      if (!peerConnection) {
-        console.warn("Received ICE candidate but no peer connection");
-        return;
-      }
-
-      if (!peerConnection.remoteDescription) {
-        console.log("Buffering ICE candidate (no remote description yet)");
+      // FIX: Agar peerConnection nahi hai YA remoteDescription nahi hai, dono case me BUFFER karo
+      if (!peerConnection || !peerConnection.remoteDescription) {
+        console.log("Buffering ICE candidate (waiting for connection/remote desc)");
         set({ pendingIceCandidates: [...get().pendingIceCandidates, candidate] });
         return;
       }
