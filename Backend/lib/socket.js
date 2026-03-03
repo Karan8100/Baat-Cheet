@@ -24,6 +24,11 @@ const io = new Server(server, {
     origin: getAllowedOrigins(),
     credentials: true,
   },
+
+  // 👇 YE DO LINES TUNE MISS KAR DI THI 👇
+  pingTimeout: 60000,   // 60 seconds tak user ko disconnect mat maano
+  pingInterval: 25000,  // Har 25 second me connection check karo
+
 });
 
 // Online users track karne ke liye: { userId: socketId }
