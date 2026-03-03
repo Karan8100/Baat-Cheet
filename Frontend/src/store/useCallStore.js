@@ -262,7 +262,9 @@ export const useCallStore = create((set, get) => ({
       console.log("Received offer from:", fromUserId);
       set({ pendingOffer: sdp });
 
-      const { currentCall, peerConnection, localStream } = get();
+      // 👇 Yahan incomingCall ko bhi get() se nikalna hai 👇
+      const { currentCall, incomingCall, peerConnection, localStream } = get();
+      
       if (
         currentCall &&
         currentCall.callId === callId &&
@@ -280,7 +282,8 @@ export const useCallStore = create((set, get) => ({
           incomingCall: {
             callId,
             fromUserId,
-            callType: "video",
+            // 👇 THE FIX: Purana callType use karo, zabardasti 'video' mat thopo 👇
+            callType: incomingCall?.callType || "video",
           },
           callStatus: "incoming",
         });
