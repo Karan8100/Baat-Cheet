@@ -177,11 +177,13 @@ export const useAuthStore = create((set, get) => ({
       existingSocket.disconnect();
     }
 
-    console.log("📡 Connecting to socket at:", BASE_URL);
+    console.log(" Connecting to socket at:", BASE_URL);
     const socket = io(BASE_URL, {
       query: {
         userId: authUser._id,
       },
+
+      transports: ["websocket"],
       reconnection: true,
       reconnectionDelay: 1000,
       reconnectionDelayMax: 5000,
