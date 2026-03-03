@@ -1,42 +1,71 @@
 import { create } from "zustand";
 import toast from "react-hot-toast";
 import { useAuthStore } from "./useAuthStore.js";
-const rtcConfig = {
-  iceServers: [
-    // STUN servers
-    {
-      urls: [
-        "stun:stun.l.google.com:19302",
-        "stun:stun1.l.google.com:19302"
-      ]
-    },  
-    // 2. Metered.ca STUN server
-    {
-      urls: "stun:stun.relay.metered.ca:80",
-    },
+// const rtcConfig = {
+//   iceServers: [
+//     // STUN servers
+//     {
+//       urls: [
+//         "stun:stun.l.google.com:19302",
+//         "stun:stun1.l.google.com:19302"
+//       ]
+//     },  
+//     // 2. Metered.ca STUN server
+//     {
+//       urls: "stun:stun.relay.metered.ca:80",
+//     },
 
-    // 3. Metered.ca TURN servers (UDP & TCP fallbacks for strict networks)
-    {
-      urls: "turn:global.relay.metered.ca:80",
-      username: import.meta.env.VITE_TURN_USERNAME,
-      credential: import.meta.env.VITE_TURN_PASSWORD,
-    },
-    {
-      urls: "turn:global.relay.metered.ca:80?transport=tcp",
-      username: import.meta.env.VITE_TURN_USERNAME,
-      credential: import.meta.env.VITE_TURN_PASSWORD,
-    },
-    {
-      urls: "turn:global.relay.metered.ca:443",
-      username: import.meta.env.VITE_TURN_USERNAME,
-      credential: import.meta.env.VITE_TURN_PASSWORD,
-    },
-    {
-      urls: "turns:global.relay.metered.ca:443?transport=tcp",
-      username: import.meta.env.VITE_TURN_USERNAME,
-      credential: import.meta.env.VITE_TURN_PASSWORD,
-    },
-  ]
+//     // 3. Metered.ca TURN servers (UDP & TCP fallbacks for strict networks)
+//     {
+//       urls: "turn:global.relay.metered.ca:80",
+//       username: import.meta.env.VITE_TURN_USERNAME,
+//       credential: import.meta.env.VITE_TURN_PASSWORD,
+//     },
+//     {
+//       urls: "turn:global.relay.metered.ca:80?transport=tcp",
+//       username: import.meta.env.VITE_TURN_USERNAME,
+//       credential: import.meta.env.VITE_TURN_PASSWORD,
+//     },
+//     {
+//       urls: "turn:global.relay.metered.ca:443",
+//       username: import.meta.env.VITE_TURN_USERNAME,
+//       credential: import.meta.env.VITE_TURN_PASSWORD,
+//     },
+//     {
+//       urls: "turns:global.relay.metered.ca:443?transport=tcp",
+//       username: import.meta.env.VITE_TURN_USERNAME,
+//       credential: import.meta.env.VITE_TURN_PASSWORD,
+//     },
+//   ]
+// };
+
+// Frontend/src/store/useCallStore.js
+
+// 1. Ye naya function add kar (imports ke theek neeche)
+const getRTCConfig = () => {
+  const turnUsername = import.meta.env.VITE_TURN_USERNAME;
+  const turnPassword = import.meta.env.VITE_TURN_PASSWORD;
+
+  const config = {
+    iceServers: [
+      { urls: ["stun:stun.l.google.com:19302", "stun:stun1.l.google.com:19302"] }
+    ]
+  };
+
+  // 🔒 Sirf tabhi TURN use karega jab credentials env me honge. No Hardcoding!
+  if (turnUsername && turnPassword) {
+    config.iceServers.push({
+      urls: [
+        "turn:global.relay.metered.ca:80",
+        "turn:global.relay.metered.ca:80?transport=tcp",
+        "turn:global.relay.metered.ca:443"
+      ],
+      username: turnUsername,
+      credential: turnPassword,
+    });
+  }
+
+  return config;
 };
 
 const buildCallId = () => {
@@ -87,7 +116,7 @@ export const useCallStore = create((set, get) => ({
   },
 
   createPeerConnection: ({ socket, callId, peerUserId, myUserId }) => {
-    const pc = new RTCPeerConnection(rtcConfig);
+    const pc = new RTCPeerConnection(getRTCConfig());
 
     pc.onicecandidate = (event) => {
       if (!event.candidate) {
@@ -417,6 +446,55 @@ export const useCallStore = create((set, get) => ({
     }
   },
 
+  // acceptIncomingCall: async () => {
+  //   const { authUser, socket } = useAuthStore.getState();
+  //   const { incomingCall, currentCall } = get();
+
+  //   if (!authUser || !socket || !incomingCall || currentCall) return;
+
+  //   try {
+  //     const constraints = {
+  //       audio: true,
+  //       video: incomingCall.callType === "video" ? { width: { min: 640 }, height: { min: 480 } } : false,
+  //     };
+
+  //     console.log("Getting user media for incoming call with constraints:", constraints);
+  //     const localStream = await navigator.mediaDevices.getUserMedia(constraints);
+  //     console.log("Local stream obtained for incoming call:", localStream);
+
+  //     const pc = get().createPeerConnection({
+  //       socket,
+  //       callId: incomingCall.callId,
+  //       peerUserId: incomingCall.fromUserId,
+  //       myUserId: authUser._id,
+  //     });
+
+  //     localStream.getTracks().forEach((track) => {
+  //       console.log("Adding incoming call track:", track.kind);
+  //       pc.addTrack(track, localStream);
+  //     });
+
+  //     set({
+  //       localStream,
+  //       currentCall: {
+  //         callId: incomingCall.callId,
+  //         peerUserId: incomingCall.fromUserId,
+  //         callType: incomingCall.callType,
+  //         direction: "incoming",
+  //       },
+  //       incomingCall: null,
+  //       callStatus: "connecting",
+  //     });
+
+  //     console.log("Processing pending offer...");
+  //     await get().processPendingOffer(socket);
+  //   } catch (error) {
+  //     console.error("Failed to accept call", error);
+  //     toast.error("Could not accept call. Check mic/camera permission.");
+  //     get().resetCallState();
+  //   }
+  // },
+
   acceptIncomingCall: async () => {
     const { authUser, socket } = useAuthStore.getState();
     const { incomingCall, currentCall } = get();
@@ -424,14 +502,24 @@ export const useCallStore = create((set, get) => ({
     if (!authUser || !socket || !incomingCall || currentCall) return;
 
     try {
+      // 1. UI me turant "Connecting..." dikhao
+      set({ callStatus: "connecting" }); 
+
       const constraints = {
         audio: true,
         video: incomingCall.callType === "video" ? { width: { min: 640 }, height: { min: 480 } } : false,
       };
 
-      console.log("Getting user media for incoming call with constraints:", constraints);
+      console.log("Getting media... Browser might freeze here.");
       const localStream = await navigator.mediaDevices.getUserMedia(constraints);
-      console.log("Local stream obtained for incoming call:", localStream);
+      
+      // 🚨 2. THE FIX: Hardware on hone ke baad check karo kya socket drop ho gaya tha?
+      if (!socket.connected) {
+        console.log("Socket dropped during camera wakeup! Reconnecting...");
+        socket.connect();
+        // Socket ko wapas judne ke liye 1 second do, taaki call instantly na kate
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
 
       const pc = get().createPeerConnection({
         socket,
@@ -440,10 +528,7 @@ export const useCallStore = create((set, get) => ({
         myUserId: authUser._id,
       });
 
-      localStream.getTracks().forEach((track) => {
-        console.log("Adding incoming call track:", track.kind);
-        pc.addTrack(track, localStream);
-      });
+      localStream.getTracks().forEach((track) => pc.addTrack(track, localStream));
 
       set({
         localStream,
@@ -453,19 +538,24 @@ export const useCallStore = create((set, get) => ({
           callType: incomingCall.callType,
           direction: "incoming",
         },
-        incomingCall: null,
-        callStatus: "connecting",
+        incomingCall: null, // Incoming popup hatao
       });
 
-      console.log("Processing pending offer...");
       await get().processPendingOffer(socket);
+      
     } catch (error) {
       console.error("Failed to accept call", error);
-      toast.error("Could not accept call. Check mic/camera permission.");
+      
+      // Agar user ne permission deny kar di, toh caller ko batao ki reject ho gaya
+      socket.emit("call:reject", {
+        callId: incomingCall.callId,
+        fromUserId: authUser._id,
+        toUserId: incomingCall.fromUserId,
+      });
+      
       get().resetCallState();
     }
   },
-
   rejectIncomingCall: () => {
     const { authUser, socket } = useAuthStore.getState();
     const { incomingCall } = get();
