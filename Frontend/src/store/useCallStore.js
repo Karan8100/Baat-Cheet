@@ -1,11 +1,42 @@
 import { create } from "zustand";
 import toast from "react-hot-toast";
 import { useAuthStore } from "./useAuthStore.js";
-
 const rtcConfig = {
   iceServers: [
-    { urls: ["stun:stun.l.google.com:19302", "stun:stun1.l.google.com:19302"] },
-  ],
+    // STUN servers
+    {
+      urls: [
+        "stun:stun.l.google.com:19302",
+        "stun:stun1.l.google.com:19302"
+      ]
+    },  
+    // 2. Metered.ca STUN server
+    {
+      urls: "stun:stun.relay.metered.ca:80",
+    },
+
+    // 3. Metered.ca TURN servers (UDP & TCP fallbacks for strict networks)
+    {
+      urls: "turn:global.relay.metered.ca:80",
+      username: import.meta.env.VITE_TURN_USERNAME,
+      credential: import.meta.env.VITE_TURN_PASSWORD,
+    },
+    {
+      urls: "turn:global.relay.metered.ca:80?transport=tcp",
+      username: import.meta.env.VITE_TURN_USERNAME,
+      credential: import.meta.env.VITE_TURN_PASSWORD,
+    },
+    {
+      urls: "turn:global.relay.metered.ca:443",
+      username: import.meta.env.VITE_TURN_USERNAME,
+      credential: import.meta.env.VITE_TURN_PASSWORD,
+    },
+    {
+      urls: "turns:global.relay.metered.ca:443?transport=tcp",
+      username: import.meta.env.VITE_TURN_USERNAME,
+      credential: import.meta.env.VITE_TURN_PASSWORD,
+    },
+  ]
 };
 
 const buildCallId = () => {
